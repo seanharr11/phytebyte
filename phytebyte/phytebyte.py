@@ -1,0 +1,2 @@
+class PhyteByte():
+    pass
