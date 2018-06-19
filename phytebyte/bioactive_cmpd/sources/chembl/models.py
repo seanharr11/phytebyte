@@ -14,6 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
+import sqlalchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -1259,44 +1260,6 @@ class CompoundStructure(MoleculeDictionary):
     canonical_smiles = Column(String(4000))
 
 
-class MoleculeHierarchy(MoleculeDictionary):
-    __tablename__ = "molecule_hierarchy"
-
-    molregno = Column(
-        ForeignKey(
-            "molecule_dictionary.molregno",
-            deferrable=True,
-            initially="DEFERRED",
-        ),
-        primary_key=True,
-    )
-    parent_molregno = Column(
-        ForeignKey(
-            "molecule_dictionary.molregno",
-            deferrable=True,
-            initially="DEFERRED",
-        ),
-        index=True,
-    )
-    active_molregno = Column(
-        ForeignKey(
-            "molecule_dictionary.molregno",
-            deferrable=True,
-            initially="DEFERRED",
-        ),
-        index=True,
-    )
-
-    molecule_dictionary = relationship(
-        "MoleculeDictionary",
-        primaryjoin="MoleculeHierarchy.active_molregno == MoleculeDictionary.molregno",
-    )
-    molecule_dictionary1 = relationship(
-        "MoleculeDictionary",
-        primaryjoin="MoleculeHierarchy.parent_molregno == MoleculeDictionary.molregno",
-    )
-
-
 class MoleculeFracClassification(Base):
     __tablename__ = "molecule_frac_classification"
     __table_args__ = (UniqueConstraint("frac_class_id", "molregno"),)
@@ -1800,11 +1763,11 @@ class TargetRelation(Base):
     )
     targrel_id = Column(Integer, primary_key=True)
 
-    target_dictionary = relationship(
+    target_dictionary = sqlalchemy.orm.relationship(
         "TargetDictionary",
         primaryjoin="TargetRelation.related_tid == TargetDictionary.tid",
     )
-    target_dictionary1 = relationship(
+    target_dictionary1 = sqlalchemy.orm.relationship(
         "TargetDictionary",
         primaryjoin="TargetRelation.tid == TargetDictionary.tid",
     )

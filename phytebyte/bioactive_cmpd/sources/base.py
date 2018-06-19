@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import create_engine
 from typing import List, Iterator, Callable
 
-from phytebyte.drug.types import BioactiveCompound
+from phytebyte.bioactive_cmpd.types import BioactiveCompound
 
 
 class BioactiveCompoundSource(ABC):
@@ -11,9 +11,8 @@ class BioactiveCompoundSource(ABC):
         self.conn = engine.connect()
 
     @abstractmethod
-    def fetch_with_gene_tgts(self,
-                             gene_tgts: List[str]) -> Iterator[Callable[
-                                                      BioactiveCompound]]:
+    def fetch_with_gene_tgts(self, gene_tgts: List[str]) -> \
+            Iterator[Callable[[], BioactiveCompound]]:
         """
         Fetch `BioactiveCompounds`, with assayed bioactivity,
         that target specific genes.
@@ -24,8 +23,8 @@ class BioactiveCompoundSource(ABC):
         pass
 
     @abstractmethod
-    def fetch_with_compound_names(self, compound_names: List[str]
-                                  ) -> Iterator[Callable[BioactiveCompound]]:
+    def fetch_with_compound_names(self, compound_names: List[str]) -> \
+            Iterator[Callable[[], BioactiveCompound]]:
         """
         Fetch `BioactiveCompounds` that have names given by `compound_names`.
 

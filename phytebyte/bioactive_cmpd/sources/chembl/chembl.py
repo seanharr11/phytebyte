@@ -1,16 +1,16 @@
 import functools
 from typing import Callable, Iterator, List
 
-from phytebyte.drug.base import BioactiveCompoundSource
-from phytebyte.drug.types import BioactiveCompound
-from .query import (
+from phytebyte.bioactive_cmpd.sources import BioactiveCompoundSource
+from phytebyte.bioactive_cmpd import BioactiveCompound
+from .queries import (
     ChemblBioactiveCompoundQuery, ChemblRandomCompoundSmilesQuery)
 
 
 class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
     def fetch_with_gene_tgts(self,
                              gene_tgts: List[str]) ->\
-                                 Iterator[Callable[BioactiveCompound]]:
+                                 Iterator[Callable[[], BioactiveCompound]]:
         """
         Fetch `BioactiveCompounds`, with assayed bioactivity,
         that target specific genes.
@@ -21,8 +21,8 @@ class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
         query = ChemblBioactiveCompoundQuery(gene_tgts=gene_tgts)
         return self._fetch_bioactive_compounds(query)
 
-    def fetch_with_compound_names(self, compound_names: List[str]
-                                  ) -> Iterator[Callable[BioactiveCompound]]:
+    def fetch_with_compound_names(self, compound_names: List[str]) -> \
+            Iterator[Callable[[], BioactiveCompound]]:
         """
         Fetch `BioactiveCompounds` that have names given by `compound_names`.
 
@@ -36,8 +36,8 @@ class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
         query = ChemblBioactiveCompoundQuery(compound_names=compound_names)
         return self._fetch_bioactive_compounds(query)
 
-    def _fetch_bioactive_compounds(self, query) -> Iterator[Callable[
-                                                      BioactiveCompound]]:
+    def _fetch_bioactive_compounds(self, query) -> \
+            Iterator[Callable[[], BioactiveCompound]]:
         executable_query = query.build()
         # Return generator of curried functions, which when called, will
         # deserialize each row into namedtuple (allows caller to multi-process)
