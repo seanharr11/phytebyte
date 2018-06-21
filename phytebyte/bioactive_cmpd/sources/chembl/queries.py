@@ -112,14 +112,14 @@ class ChemblBioactiveCompoundQuery(Query):
 
 class ChemblRandomCompoundSmilesQuery(Query):
     def __init__(self, limit: int, excluded_smiles: List[str]):
-        self._recordLimit = limit
+        self._record_limit = limit
         self._excluded_smiles = excluded_smiles
         assert isinstance(self._excluded_smiles, (tuple, list))
-        assert isinstance(self._recordLimit, (int))
+        assert isinstance(self._record_limit, (int))
 
     def __repr__(self):
         return f"""<ChemblRandomCompoundSmilesQuery
-           Limit: {self.limit}>"""
+           Limit: {self._limit}>"""
 
     @property
     def _select(self):
@@ -140,4 +140,4 @@ class ChemblRandomCompoundSmilesQuery(Query):
 
     @property
     def _limit(self):
-        return self._recordLimit
+        return self._record_limit
