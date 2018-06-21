@@ -14,7 +14,8 @@ class Query(ABC):
                     .select_from(self._select_from)\
                     .where(self._whereclause)\
                     .order_by(self._order_by)\
-                    .group_by(*self._group_by)
+                    .group_by(*self._group_by)\
+                    .limit(self._limit)
         return query
 
     @property
@@ -41,4 +42,8 @@ class Query(ABC):
 
     @property
     def _having(self):
+        return None
+
+    @property
+    def _limit(self):
         return None

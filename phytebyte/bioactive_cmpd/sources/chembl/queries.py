@@ -112,10 +112,10 @@ class ChemblBioactiveCompoundQuery(Query):
 
 class ChemblRandomCompoundSmilesQuery(Query):
     def __init__(self, limit: int, excluded_smiles: List[str]):
-        self._limit = limit
+        self._recordLimit = limit
         self._excluded_smiles = excluded_smiles
         assert isinstance(self._excluded_smiles, (tuple, list))
-        assert isinstance(self._limit, (int))
+        assert isinstance(self._recordLimit, (int))
 
     def __repr__(self):
         return f"""<ChemblRandomCompoundSmilesQuery
@@ -137,3 +137,7 @@ class ChemblRandomCompoundSmilesQuery(Query):
     @property
     def _order_by(self):
         return func.random()
+
+    @property
+    def _limit(self):
+        return self._recordLimit
