@@ -15,6 +15,7 @@ class Query(ABC):
                     .where(self._whereclause)\
                     .order_by(self._order_by)\
                     .group_by(*self._group_by)\
+                    .having(self._having)\
                     .limit(self._limit)
         return query
 

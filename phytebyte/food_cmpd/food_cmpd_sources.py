@@ -3,11 +3,6 @@ from sqlalchemy import text
 from collections import namedtuple
 from typing import List
 
-# FoodCmpd = namedtuple("Compound", ['source', 'id', 'smiles', 'name', 'descr'])
-Food = namedtuple(
-    "FoodContent", ["food_name", "food_descr", "food_part", "content", "unit",
-                    "min", 'max', 'amount'])
-
 
 class FoodCmpd:
     def __init__(self, source, id_, smiles, name, descr, conn):

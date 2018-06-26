@@ -1,3 +1,3 @@
-from .food_cmpd_sources import FoodCmpd, FooDbConnection
+from phytebyte.food_cmpd.types import FoodCmpd, FoodContent
 
-__all__ = ['FoodCmpd', 'FooDbConnection']
+__all__ = ['FoodCmpd', 'FoodContent']
