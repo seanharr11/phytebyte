@@ -63,9 +63,8 @@ class Fingerprinter(ABC):
 
     @classmethod
     def get_available_fingerprints(cls):
-        from phytebyte.fingerprinters.pybel.daylight import (
-            DaylightFingerprinter)
-        from .spectrophore import SpectrophoreFingerprinter
+        from phytebyte.fingerprinters.pybel import (
+            DaylightFingerprinter, SpectrophoreFingerprinter)
         return {
                 'daylight': DaylightFingerprinter,
                 'spectrophore': SpectrophoreFingerprinter

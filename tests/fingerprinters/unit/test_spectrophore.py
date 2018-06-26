@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 
 
-from phytebyte.fingerprinters.spectrophore import SpectrophoreFingerprinter
+from phytebyte.fingerprinters.pybel import SpectrophoreFingerprinter
 
 
 def test_init():
