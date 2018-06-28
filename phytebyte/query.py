@@ -4,7 +4,8 @@ from sqlalchemy import select
 
 class Query(ABC):
     def __str__(self):
-        return self.build().compile(compile_kwargs={"literal_binds": True})
+        return str(self.build().compile(
+            compile_kwargs={"literal_binds": True}))
 
     def __repr__(self):
         return str(self)
@@ -15,8 +16,9 @@ class Query(ABC):
                     .where(self._whereclause)\
                     .order_by(self._order_by)\
                     .group_by(*self._group_by)\
-                    .having(self._having)\
                     .limit(self._limit)
+        if self._having:
+            query = query.having(self._having)
         return query
 
     @property
