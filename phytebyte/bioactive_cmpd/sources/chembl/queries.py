@@ -1,4 +1,4 @@
-from sqlalchemy import select, and_, not_, func
+from sqlalchemy import select, and_, not_, func, join
 from typing import List
 
 from phytebyte import Query
@@ -60,25 +60,24 @@ class ChemblBioactiveCompoundQuery(Query):
     @property
     def _select_from(self):
         return (
-            ComponentSynonym.__table__
-            .join(ComponentSequence,
+             join(ComponentSequence, ComponentSynonym,
                   ComponentSequence.component_id ==
                   ComponentSynonym.component_id)
-            .join(TargetComponent,
-                  TargetComponent.component_id ==
-                  ComponentSequence.component_id)
-            .join(TargetDictionary,
-                  TargetDictionary.tid == TargetComponent.tid)
-            .join(Assay,
-                  Assay.tid == TargetDictionary.tid)
-            .join(Activity,
-                  Activity.assay_id == Assay.assay_id)
-            .join(CompoundRecord,
-                  CompoundRecord.record_id == Activity.record_id)
-            .join(MoleculeDictionary,
-                  MoleculeDictionary.molregno == CompoundRecord.molregno)
-            .join(CompoundStructure,
-                  CompoundStructure.molregno == MoleculeDictionary.molregno))
+             .join(TargetComponent,
+                   TargetComponent.component_id ==
+                   ComponentSequence.component_id)
+             .join(TargetDictionary,
+                   TargetDictionary.tid == TargetComponent.tid)
+             .join(Assay,
+                   Assay.tid == TargetDictionary.tid)
+             .join(Activity,
+                   Activity.assay_id == Assay.assay_id)
+             .join(CompoundRecord,
+                   CompoundRecord.record_id == Activity.record_id)
+             .join(MoleculeDictionary,
+                   MoleculeDictionary.molregno == CompoundRecord.molregno)
+             .join(CompoundStructure,
+                   CompoundStructure.molregno == MoleculeDictionary.molregno))
 
     @property
     def _whereclause(self):

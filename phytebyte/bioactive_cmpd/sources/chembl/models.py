@@ -1243,7 +1243,7 @@ class CompoundProperty(MoleculeDictionary):
     num_lipinski_ro5_violations = Column(SmallInteger)
 
 
-class CompoundStructure(MoleculeDictionary):
+class CompoundStructure(Base):
     __tablename__ = "compound_structures"
 
     molregno = Column(
