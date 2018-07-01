@@ -51,7 +51,11 @@ class Fingerprinter(ABC):
 
     def bitarrays_to_nparrays(self, bitarray_iter) -> np.ndarray:
         """ Converts bitarray encoding of each Fingerprint into an nparray  """
-        return [np.array(bitarray.tolist()) for bitarray in bitarray_iter]
+        return [self.bitarray_to_nparray(bitarr) for bitarr in bitarray_iter]
+
+    def bitarray_to_nparray(self, bitarr) -> np.array:
+        """ Converts bitarray encoding of 1 Fingerprint into an nparray  """
+        return np.array(bitarr.tolist())
 
     @abstractmethod
     def smiles_to_nparray(self, smiles: str) -> np.array:

@@ -1,4 +1,5 @@
 from bitarray import bitarray
+import numpy as np
 
 
 class MockFingerprinter(object):
@@ -17,6 +18,9 @@ class MockFingerprinter(object):
     def smiles_to_bitarray(self, smile):
         self.call_arg_ls.append((smile,))
         return self.smile_to_fp_dict[smile]
+
+    def bitarray_to_nparray(self, bitarr):
+        return np.array(bitarr.tolist())
 
 
 class MockBioactiveCmpdSource(object):

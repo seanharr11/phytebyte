@@ -1,6 +1,7 @@
 from phytebyte.bioactive_cmpd.negative_samplers import (
     NotEnoughSamples)
 
+import numpy as np
 import pytest
 import types
 
@@ -15,11 +16,11 @@ def test_sample_returns_iter(ttn_sampler):
     assert isinstance(sample_iter, types.GeneratorType)
 
 
-def test_sample_returns_iter_of_smiles_strs(ttn_sampler):
+def test_sample_returns_iter_of_smiles_ndarrays(ttn_sampler):
     sample_iter = ttn_sampler.sample(['C=N'], 100)
     sample = next(sample_iter)
     [_ for _ in sample_iter]
-    assert isinstance(sample, str)
+    assert isinstance(sample, np.ndarray)
 
 
 def test_sample__sz_is_respected(ttn_sampler):
