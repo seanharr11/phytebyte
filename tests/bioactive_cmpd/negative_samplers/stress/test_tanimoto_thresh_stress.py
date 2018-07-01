@@ -18,8 +18,8 @@ def test_sample__100000(ttn_sampler):
 
 
 def test_sample__memory_overhead(ttn_sampler):
-    sample_iter = ttn_sampler.sample(['C=N']*1000, 1000000)
+    sample_iter = ttn_sampler.sample(['C=N']*1000, 100000)
     samples = [sample for sample in sample_iter]
     size = sys.getsizeof(samples) / 1024 / 1024 / 1024.0
-    print(f"Size: {size}")
+    print(f"Size: {size}GB")
     assert size < 1.0
