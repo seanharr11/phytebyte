@@ -16,5 +16,5 @@ def ttn_sampler(max_tani_thresh):
     ttn_sampler = TanimotoThreshNegativeSampler(
         mock_bioactive_cmpd_source,
         mock_fingerprinter,
-        max_tani_thresh)
+        max_tanimoto_thresh=max_tani_thresh)
     return ttn_sampler

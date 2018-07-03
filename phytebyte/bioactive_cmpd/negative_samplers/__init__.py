@@ -1,5 +1,9 @@
 from .tanimoto_thresh_neg_sampler import (
-    TanimotoThreshNegativeSampler, NotEnoughSamples)
+    TanimotoThreshNegativeSampler)
+from .base import (
+    NotEnoughSamples,
+    NegativeSampler)
 
 
-__all__ = ['NotEnoughSamples', 'TanimotoThreshNegativeSampler']
+__all__ = ['NotEnoughSamples', 'NegativeSampler',
+           'TanimotoThreshNegativeSampler']
