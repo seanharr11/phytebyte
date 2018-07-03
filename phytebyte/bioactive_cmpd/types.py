@@ -21,3 +21,6 @@ BioactiveCompoundMechanism = namedtuple("BioactiveCompoundMechanism", [
 
 CompoundBioactivity = namedtuple("CompoundBioactivity", [
     "amount", "units", "type", "descr"])
+
+ModelInputContainer = namedtuple("ModelInputContainer", [
+    'train_X', 'train_y', 'test_X', 'test_y'])
