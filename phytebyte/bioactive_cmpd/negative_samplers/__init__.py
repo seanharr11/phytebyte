@@ -1,4 +1,4 @@
-from .tanimoto_thresh_neg_sampler import (
+from .tanimoto_thresh import (
     TanimotoThreshNegativeSampler)
 from .base import (
     NotEnoughSamples,
