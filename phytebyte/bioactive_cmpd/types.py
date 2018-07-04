@@ -14,7 +14,7 @@ BioactivityStandardFilter = namedtuple("BioactivityStandardFilter", [
     "types",
     "relations",
     "units",
-    "min_value"])
+    "max_value"])
 
 BioactiveCompoundMechanism = namedtuple("BioactiveCompoundMechanism", [
     "mechanism_of_action", "action_type", "comment"])

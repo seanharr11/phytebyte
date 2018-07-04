@@ -14,7 +14,7 @@ default_bioact_filter = BioactivityStandardFilter(
     types=['IC50', 'EC50', 'AC50', 'GI50'],
     relations=['=', '<'],
     units=['nM'],
-    min_value=20000)
+    max_value=20000)
 
 
 class ChemblBioactiveCompoundQuery(Query):
@@ -90,7 +90,7 @@ class ChemblBioactiveCompoundQuery(Query):
                 self._bioact_standard_filter.relations),
             Activity.standard_units.in_(
                 self._bioact_standard_filter.units),
-            Activity.standard_value > self._bioact_standard_filter.min_value)
+            Activity.standard_value < self._bioact_standard_filter.max_value)
         if self._gene_tgts:
             and_tuple += (ComponentSynonym.component_synonym.in_(
                 self._gene_tgts),)
