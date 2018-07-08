@@ -1,8 +1,10 @@
+from typing import List
+
 from phytebyte.bioactive_cmpd.types import BioactiveCompound
 from phytebyte.fingerprinters.base import Fingerprinter
 
 
-class PositiveClusterFinder():
+class PositiveClusterer():
     def __init__(self,
                  pos_cmpds: List[BioactiveCompound],
                  fingerprinter: Fingerprinter):
