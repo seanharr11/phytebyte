@@ -1,6 +1,5 @@
 from abc import abstractmethod, ABC
 from multiprocessing import cpu_count, Pool
-import numpy as np
 from typing import List, Iterator
 
 
@@ -23,8 +22,7 @@ class NegativeSampler(ABC):
         self._num_proc = num_proc
         self._excluded_mol_bitarrays = None
 
-    def sample(self, excluded_smiles_ls: List[str], sz: int) -> Iterator[
-                                                                   np.ndarray]:
+    def sample(self, excluded_smiles_ls: List[str], sz: int) -> Iterator:
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
             excluded_smiles=excluded_smiles_ls,
             limit=sz * 2)
@@ -33,15 +31,15 @@ class NegativeSampler(ABC):
             for smiles in excluded_smiles_ls]
         with Pool(self._num_proc) as p:
             cnt = 0
-            for neg_ndarray in p.imap_unordered(
+            for neg_x in p.imap_unordered(
                self._filter, rand_neg_smiles_iter):
-                if neg_ndarray is not None:
+                if neg_x is not None:
                     cnt += 1
                     if cnt > sz:
                         p.terminate()
                         p.join()
                         break
-                    yield neg_ndarray
+                    yield neg_x
             if cnt < sz:
                 p.terminate()
                 p.join()
@@ -49,7 +47,7 @@ class NegativeSampler(ABC):
                     f"Queried {sz*2} samples, filterd to {cnt}, expected {sz}")
 
     @abstractmethod
-    def _filter(self, smiles: str) -> np.ndarray:
+    def _filter(self, smiles: str):
         """ Params: smiles :str - The SMiLES (str) representation of the cmpd
             Returns: np.ndarray representing the Fingerprinter-encoded repr
         """
