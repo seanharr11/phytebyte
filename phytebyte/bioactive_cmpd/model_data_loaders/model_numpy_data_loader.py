@@ -2,22 +2,22 @@ import numpy as np
 from typing import List
 
 from phytebyte.bioactive_cmpd.sources.base import BioactiveCompoundSource
-from phytebyte.bioactive_cmpd.negative_sampler import NegativeSampler
-from phytebyte.bioactive_cmpd.positive_clusterer import (
-    PositiveClusterer, FingerprintCluster)
+from phytebyte.bioactive_cmpd.negative_samplers import NegativeSampler
+from phytebyte.bioactive_cmpd.clustering import (
+    NumpyClusterer, NumpyCluster)
 from phytebyte.bioactive_cmpd import TargetInput
 from phytebyte.bioactive_cmpd.types import ModelInputContainer
 
 
-class ModelDataLoader():
+class NumpyModelDataLoader():
     def __init__(self,
                  source: BioactiveCompoundSource,
                  negative_sampler: NegativeSampler,
-                 positive_clusterer: PositiveClusterer,
+                 positive_clusterer: NumpyClusterer,
                  target_input: TargetInput):
         self._source = source
         self._negative_sampler = negative_sampler
-        self._positive_clusterer: positive_clusterer
+        self._positive_clusterer = positive_clusterer
         self._target_input = target_input
 
         self._pos_cmpd_clusters = None
@@ -28,17 +28,20 @@ class ModelDataLoader():
         pos_cmpds = self._target_input.fetch_bioactive_cmpds(
             self._source)
         # From this point forward pos_cmps exist as np.arrays in objs
-        self._pos_cmpd_clusters = self._positive_clusterer.cluster(pos_cmpds)
-        assert isinstance(self._pos_cmpd_clusters, FingerprintCluster)
+        self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
+            pos_cmpds)
+        # TODO: What if we want to use NumPy for clustering, and TensorFlow
+        # in our negative_sampler ?
+        assert isinstance(self._pos_cmpd_clusters[0], NumpyCluster)
         self._neg_cmpd_clusters = self._create_negative_cmpd_clusters(
             neg_sample_size_factor)
-        assert isinstance(self._neg_cmpd_clusters, FingerprintCluster)
+        assert isinstance(self._neg_cmpd_clusters[0], NumpyCluster)
 
     def _create_negative_cmpd_clusters(self,
                                        neg_sample_size_factor: int) -> List[
-                                            FingerprintCluster]:
+                                            NumpyCluster]:
         # We realize our Iterator into a List here...
-        return [FingerprintCluster(
+        return [NumpyCluster(
                     list(self._negative_sampler.sample(
                         [c.smiles for c in pos_cluster],
                         len(pos_cluster) * neg_sample_size_factor)))
