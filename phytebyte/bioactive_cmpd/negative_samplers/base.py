@@ -14,16 +14,21 @@ class NegativeSampler(ABC):
     def __init__(self,
                  source: BioactiveCompoundSource,
                  fingerprinter: Fingerprinter,
-                 neg_sample_encoding: str,
                  num_proc: int=cpu_count(),
                  *args, **kwargs):
         self._source = source
         self._fingerprinter = fingerprinter
-        self._neg_sample_encoding = neg_sample_encoding
         self._num_proc = num_proc
         self._excluded_mol_ls = None
 
+        self._neg_sample_encoding = None
+
+    def set_neg_sample_encoding(self, encoding: str):
+        self._neg_sample_encoding = encoding
+
     def sample(self, excluded_smiles_ls: List[str], sz: int) -> Iterator:
+        if self._neg_sample_encoding is None:
+            raise Exception("Must 'set_neg_sample_encoding()' before sampling")
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
             excluded_smiles=excluded_smiles_ls,
             limit=sz * 2)
@@ -47,17 +52,8 @@ class NegativeSampler(ABC):
                     f"Queried {sz*2} samples, filterd to {cnt}, expected {sz}")
 
     def _filter_and_encode(self, neg_smiles: str):
-        return self.dispatched_fp_encoding_func(neg_smiles)\
+        return self._fingerprinter.fingerprint_and_encode(neg_smiles)\
             if self._filter_func(neg_smiles) else None
-
-    # TODO: @lazy_property
-    def _dispatched_fp_encoding_func(self, encoding: str):
-        if encoding == 'numpy':
-            return self._fingerprinter.smiles_to_nparray
-        elif encoding == 'bitarray':
-            return self._fingerprinter.smiles_to_bitarray
-        else:
-            raise NotImplementedError
 
     @abstractmethod
     def _filter_func(self, smiles: str) -> bool:
