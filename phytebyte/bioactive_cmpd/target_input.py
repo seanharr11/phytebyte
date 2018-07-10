@@ -1,13 +1,15 @@
 from abc import abstractmethod, ABC
-from typing import List
+from typing import List, Iterator
 
 from phytebyte.sources import BioactiveCompoundSource
+from phytebyte.types import BioactiveCompound
 
 
 class TargetInput(ABC):
 
     @abstractmethod
-    def fetch_bioactive_cmpds(self, source: BioactiveCompoundSource):
+    def fetch_bioactive_cmpds(self, source: BioactiveCompoundSource
+                              ) -> Iterator[BioactiveCompound]:
         pass
 
 
