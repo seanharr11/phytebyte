@@ -22,6 +22,15 @@ class MockFingerprinter(object):
     def bitarray_to_nparray(self, bitarr):
         return np.array(bitarr.tolist())
 
+    def fingerprint_and_encode(self, smiles, encoding):
+        if encoding == 'bitarray':
+            return self.smiles_to_bitarray(smiles)
+        elif encoding == 'numpy':
+            return self.bitarray_to_nparray(
+                self.smiles_to_bitarray(smiles))
+        else:
+            raise Exception("Add the new encoding here!")
+
 
 class MockBioactiveCmpdSource(object):
     def __init__(self):

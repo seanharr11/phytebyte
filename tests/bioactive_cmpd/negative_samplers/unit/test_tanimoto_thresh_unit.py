@@ -11,6 +11,12 @@ def test_init(ttn_sampler):
     assert ttn_sampler._fingerprinter
 
 
+def test_sample_wo_set_sample_encoding(ttn_sampler_wo_set_sample_encoding):
+    sample_iter = ttn_sampler_wo_set_sample_encoding.sample(['C=N'], 100)
+    with pytest.raises(Exception):
+        next(sample_iter)
+
+
 def test_sample_returns_iter(ttn_sampler):
     sample_iter = ttn_sampler.sample(['C=N'], 100)
     assert isinstance(sample_iter, types.GeneratorType)

@@ -14,8 +14,8 @@ class TanimotoThreshNegativeSampler(NegativeSampler):
 
     def _encode_excluded_mol_ls(self,
                                 excluded_smiles: List[str]) -> List[bitarray]:
-        encoding_func = self._dispatched_fp_encoding_func('bitarray')
-        return [encoding_func(smiles) for smiles in excluded_smiles]
+        return [self._fingerprinter.fingerprint_and_encode(smiles, 'bitarray')
+                for smiles in excluded_smiles]
 
     def _filter_func(self, neg_smile: str) -> bool:
         neg_smile_bitarray = self._fingerprinter.smiles_to_bitarray(neg_smile)

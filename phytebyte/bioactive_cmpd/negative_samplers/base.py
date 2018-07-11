@@ -21,14 +21,14 @@ class NegativeSampler(ABC):
         self._num_proc = num_proc
         self._excluded_mol_ls = None
 
-        self._neg_sample_encoding = None
+        self._sample_encoding = None
 
-    def set_neg_sample_encoding(self, encoding: str):
-        self._neg_sample_encoding = encoding
+    def set_sample_encoding(self, encoding: str):
+        self._sample_encoding = encoding
 
     def sample(self, excluded_smiles_ls: List[str], sz: int) -> Iterator:
-        if self._neg_sample_encoding is None:
-            raise Exception("Must 'set_neg_sample_encoding()' before sampling")
+        assert self._sample_encoding is not None,\
+            "Must 'set_sample_encoding()' before sampling"
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
             excluded_smiles=excluded_smiles_ls,
             limit=sz * 2)
@@ -37,7 +37,7 @@ class NegativeSampler(ABC):
         with Pool(self._num_proc) as p:
             cnt = 0
             for neg_x in p.imap_unordered(
-               self._filter_and_convert, rand_neg_smiles_iter):
+               self._filter_and_encode, rand_neg_smiles_iter):
                 if neg_x is not None:
                     cnt += 1
                     if cnt > sz:
@@ -52,7 +52,8 @@ class NegativeSampler(ABC):
                     f"Queried {sz*2} samples, filterd to {cnt}, expected {sz}")
 
     def _filter_and_encode(self, neg_smiles: str):
-        return self._fingerprinter.fingerprint_and_encode(neg_smiles)\
+        return self._fingerprinter.fingerprint_and_encode(
+                neg_smiles, self._sample_encoding)\
             if self._filter_func(neg_smiles) else None
 
     @abstractmethod
