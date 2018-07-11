@@ -31,6 +31,14 @@ class Fingerprinter(ABC):
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
         return fp_class(*args, **kwargs)
 
+    def fingerprint_and_encode(self, smiles: str, encoding: str):
+        if encoding == 'numpy':
+            return self.smiles_to_nparray(smiles)
+        elif encoding == 'bitarray':
+            return self.smiles_to_bitarray(smiles)
+        else:
+            raise NotImplementedError(encoding)
+
     def smiles_to_nparrays(self, smiles_iter) -> np.ndarray:
         """ Converts `smiles_iter` into an np.array of np.arrays,
         with each fingerprint being encoded as an np.array of dtype uint8,

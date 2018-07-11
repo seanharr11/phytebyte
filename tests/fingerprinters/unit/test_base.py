@@ -66,3 +66,16 @@ def test_bitarrays_to_nparrays(subclassed_fingerprinter, mock_bit_string):
     assert np.array_equal(
         nparrays[0],
         np.array([int(bit) for bit in mock_bit_string], dtype='bool'))
+
+
+def test_fingerprint_and_encode__numpy(subclassed_fingerprinter, mock_smiles):
+    nd_arr = subclassed_fingerprinter.fingerprint_and_encode(mock_smiles,
+                                                             'numpy')
+    assert isinstance(nd_arr, np.ndarray)
+
+
+def test_fingerprint_and_encode__bitarray(subclassed_fingerprinter,
+                                          mock_smiles):
+    bitarr = subclassed_fingerprinter.fingerprint_and_encode(mock_smiles,
+                                                             'bitarray')
+    assert isinstance(bitarr, bitarray)

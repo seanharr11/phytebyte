@@ -12,7 +12,7 @@ def pybel_fp():
         @property
         def _pybel_fp_name(self):
             return "FP2"
-        
+
         @property
         def _pybel_fp_length(self):
             return 1024
@@ -25,7 +25,7 @@ def bad_pybel_fp():
         @property
         def _pybel_fp_name(self):
             return "bad-bad-bad"
-        
+
         @property
         def _pybel_fp_length(self):
             return 1024
