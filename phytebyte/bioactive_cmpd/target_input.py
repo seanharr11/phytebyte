@@ -1,8 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import List, Iterator
 
-from phytebyte.sources import BioactiveCompoundSource
-from phytebyte.types import BioactiveCompound
+from .sources import BioactiveCompoundSource
+from .types import BioactiveCompound
 
 
 class TargetInput(ABC):
@@ -36,3 +36,7 @@ class CompoundNamesTargetInput(TargetInput):
 
     def fetch_bioactive_cmpds(self, source: BioactiveCompoundSource):
         return source.fetch_with_compound_names(self._compound_names)
+
+
+class MetabolitesTargetInput(TargetInput):
+    pass

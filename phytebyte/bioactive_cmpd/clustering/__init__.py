@@ -1,4 +1,4 @@
-from .numpy import (
-    NumpyCluster, NumpyClusterer)
+from .clusterer import Clusterer
+from .cluster import Cluster
 
-__all__ = ['NumpyCluster', 'NumpyClusterer']
+__all__ = ['Cluster', 'Clusterer']
