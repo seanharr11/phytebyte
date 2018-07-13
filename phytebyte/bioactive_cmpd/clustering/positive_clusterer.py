@@ -47,6 +47,5 @@ class PositiveClusterer(Clusterer):
             best_eps = eps_seq[np.where(ss_seq == np.max(ss_seq))][-1]
             # Arbitrarily choose the higher eps value if SSs are equal
             labels = self.run_dbscan(best_eps)
-            return [Cluster(self._fingerprinter,
-                            np.array(self._pos_cmpds)[labels == l])
+            return [Cluster(np.array(self._pos_cmpds)[labels == l])
                     for l in np.unique(labels)]
