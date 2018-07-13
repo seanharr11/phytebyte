@@ -16,7 +16,7 @@ class PositiveClusterer(Clusterer):
         self._pos_cmpds = pos_cmpds
         self._fingerprinter = fingerprinter
         self._data = self._fingerprinter.smiles_to_nparrays(
-            [c.canonical_smiles for c in self._pos_cmpds])
+            [c.smiles for c in self._pos_cmpds])
 
     def run_dbscan(self, eps):
         cluster_fit = DBSCAN(eps=eps).fit(self._data)

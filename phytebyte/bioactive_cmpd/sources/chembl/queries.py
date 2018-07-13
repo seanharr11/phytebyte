@@ -39,7 +39,7 @@ class ChemblBioactiveCompoundQuery(Query):
     @staticmethod
     def row_to_bioactive_compound(row) -> BioactiveCompound:
         return BioactiveCompound(
-            uid=row[0], pref_name=row[1], canonical_smiles=row[2],
+            uid=row[0], pref_name=row[1], smiles=row[2],
             gene_target=row[3], name=row[4],
             bioactivities=[CompoundBioactivity(*bioact_tup)
                            for bioact_tup in zip(*row[5:9])])

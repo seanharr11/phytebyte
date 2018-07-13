@@ -4,7 +4,7 @@ from collections import namedtuple
 BioactiveCompound = namedtuple("BioactiveCompound", [
     "uid",
     "pref_name",
-    "canonical_smiles",
+    "smiles",
     "gene_target",
     "name",
     "bioactivities"])
