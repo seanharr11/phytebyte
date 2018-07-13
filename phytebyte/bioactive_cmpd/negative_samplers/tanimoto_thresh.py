@@ -2,14 +2,17 @@ from bitarray import bitarray
 from typing import List
 
 from .base import NegativeSampler
+from phytebyte.fingerprinters import Fingerprinter
 
 
 class TanimotoThreshNegativeSampler(NegativeSampler):
     def __init__(self,
                  *args,
                  max_tanimoto_thresh=.6,
+                 fingerprinter: Fingerprinter=Fingerprinter.create("daylight"),
                  **kwargs):
         self._max_tanimoto_thresh = max_tanimoto_thresh
+        self._fingerprinter = fingerprinter
         super().__init__(*args, **kwargs)
 
     def _encode_excluded_mol_ls(self,

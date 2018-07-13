@@ -5,6 +5,11 @@ from phytebyte.bioactive_cmpd.negative_samplers import (
 
 
 @pytest.fixture
+def output_fingerprinter():
+    return MockFingerprinter()
+
+
+@pytest.fixture
 def max_tani_thresh():
     return .6
 

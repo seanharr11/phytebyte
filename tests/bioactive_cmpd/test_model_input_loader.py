@@ -5,6 +5,11 @@ from phytebyte.bioactive_cmpd.model_input_loader import ModelInputLoader
 
 
 @pytest.fixture
+def output_fingerprinter():
+    return Mock()
+
+
+@pytest.fixture
 def mock_source():
     m = Mock()
     return m
@@ -60,7 +65,7 @@ def test_init(mock_source, mock_negative_sampler,
 
 
 def test_load(model_input_loader, mock_binary_classifier_input):
-    model_input_loader.load(2)
+    model_input_loader.load(2, output_fingerprinter)
     assert model_input_loader.model_inputs == [
         mock_binary_classifier_input] * 2
 
@@ -77,7 +82,7 @@ def test_load__calls_BinaryClassifierInputFactory_create(
     mock_bcif.create = MagicMock(return_value=Mock())
     monkeypatch.setattr("phytebyte.bioactive_cmpd.model_input_loader."
                         "BinaryClassifierInputFactory", mock_bcif)
-    mil.load(2)
+    mil.load(2, output_fingerprinter)
     call_args_ls = mock_bcif.create.call_args_list
     assert len(call_args_ls) == 2
     assert set(call_args_ls[0][1].keys()) == set(
