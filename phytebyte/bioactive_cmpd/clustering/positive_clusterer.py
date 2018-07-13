@@ -6,6 +6,7 @@ from sklearn.metrics import silhouette_score
 from phytebyte.bioactive_cmpd.types import BioactiveCompound
 from phytebyte.fingerprinters.base import Fingerprinter
 from .clusterer import Clusterer
+from .cluster import Cluster
 
 
 class PositiveClusterer(Clusterer):
@@ -34,16 +35,18 @@ class PositiveClusterer(Clusterer):
         labels_seq = [self.run_dbscan(e) for e in eps_seq]
         return np.array([self.get_silhouette(l) for l in labels_seq])
 
-    def find_clusters(self, eps_seq=[0.1, 10, 15, 20, 100]):
+    def find_clusters(self, eps_seq=np.array([0.1, 10, 15, 20, 100])):
         ss_seq = self.silhouette_series(eps_seq)
         if np.max(ss_seq) < 0.5:
             # No silhouette score sufficient to warrant grouping
-            return [self._pos_cmpds]
+            return [Cluster(self._fingerprinter, self._pos_cmpds)]
         elif (np.max(ss_seq) in ss_seq[[0, -1]]) & (np.max(ss_seq) != -2):
             # Raise error if max score is from an extreme epsilon value
             raise Exception("Silhouette optimal at an outlier epsilon value.")
         else:
-            max_idx = np.max(np.which(ss_seq == np.max(ss_seq)))
-            labels = self.run_dbscan(eps_seq[max_idx])
-            return [np.array(self._pos_cmpds)[labels == l] for l in
-                    np.unique(labels)]
+            best_eps = eps_seq[np.where(ss_seq == np.max(ss_seq))][-1]
+            # Arbitrarily choose the higher eps value if SSs are equal
+            labels = self.run_dbscan(best_eps)
+            return [Cluster(self._fingerprinter,
+                            np.array(self._pos_cmpds)[labels == l])
+                    for l in np.unique(labels)]

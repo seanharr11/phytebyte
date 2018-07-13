@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import Mock, MagicMock
 import numpy as np
 
+from phytebyte.bioactive_cmpd.clustering.cluster import Cluster
 from phytebyte.bioactive_cmpd.clustering.positive_clusterer import (
     PositiveClusterer)
 from phytebyte.bioactive_cmpd.types import BioactiveCompound
@@ -72,16 +73,18 @@ def test_silhouette_series(pc):
                   np.logical_and(ss_seq >= -1, ss_seq <= 1))
 
 
-def find_clusters(pc):
-    pc.silhouette_series = MagicMock(return_value=[0.1, 0.2, 0.1])
+def test_find_clusters(pc, bc):
+    pc.silhouette_series = MagicMock(return_value=np.array([0.1, 0.2, 0.1]))
     assert len(pc.find_clusters()) == 1
-    pc.silhouette_series = MagicMock(return_value=[0, 0.1, 0.2])
+    pc.silhouette_series = MagicMock(return_value=np.array([0, 0.1, 0.7]))
     with pytest.raises(Exception):
         pc.find_clusters()
-    pc.silhouette_series = MagicMock(return_value=[0.1, 0.7, 0.1])
-    pc._data = np.zeros((10, 2))
+    pc.silhouette_series = MagicMock(return_value=np.array([0.1, 0.7, 0.1]))
     pc.run_dbscan = MagicMock(return_value=np.zeros(10))
-    assert len(pc.find_clusters()) == len(pc.silhouette_series())
+    pc._pos_cmpds = [bc] * 10
+    assert isinstance(pc.find_clusters(), list)
+    assert all([isinstance(c, Cluster) for c in pc.find_clusters()])
+    #assert len(pc.find_clusters()) == len(pc.silhouette_series())
 
 
 # def test_finder_returns_list(pc):
