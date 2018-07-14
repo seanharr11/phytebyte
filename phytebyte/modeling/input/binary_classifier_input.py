@@ -44,8 +44,11 @@ class NumpyBinaryClassifierInput(BinaryClassifierInput):
 
     @property
     def train(self) -> tuple:
-        return (self._X[self._train_idx],
-                self._y[self._train_idx])
+        if self._train_idx:
+            return (self._X[self._train_idx],
+                    self._y[self._train_idx])
+        else:
+            return (self._X, self._y)
 
     @property
     def test(self) -> tuple:
