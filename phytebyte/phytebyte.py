@@ -2,17 +2,23 @@ from .bioactive_cmpd.negative_samplers import NegativeSampler
 from .bioactive_cmpd.clustering import Clusterer
 from .bioactive_cmpd.target_input import TargetInput
 from .bioactive_cmpd.sources import BioactiveCompoundSource
+from .bioactive_cmpd import ModelInputLoader
 from .modeling.models import BinaryClassifierModel
 from .food_cmpd import FoodCmpdSource, FoodCmpd
-from .bioactive_cmpd import ModelInputLoader
+from .fingerprinters import Fingerprinter
 
 from typing import List, Iterator, Tuple
 
 
 class PhyteByte():
     def __init__(self, config_file_path: str=None):
-        self._config_file_path = config_file_path
         self.model = None
+        self._config_file_path = config_file_path
+        self._negative_sampler = None
+        self._positive_clusterer = None
+        self._target_input = None
+        self._source = None
+        self._fingerprinter = None
 
         if config_file_path:
             self._load_config()
@@ -26,8 +32,11 @@ class PhyteByte():
             negative_sampler_name, *args, **kwargs)
 
     def set_positive_clusterer(self, clusterer_name: str, *args, **kwargs):
-        self._positive_cluster = Clusterer.create(
+        self._positive_clusterer = Clusterer.create(
             clusterer_name, *args, **kwargs)
+
+    def set_fingerprinter(self, fingerprinter_name: str):
+        self._fingerprinter = Fingerprinter.create(fingerprinter_name)
 
     def set_target_input(self, target_input: TargetInput):
         self._target_input = target_input
@@ -56,7 +65,7 @@ class PhyteByte():
         for food_cmpd in food_cmpd_iter:
             encoded_cmpd = self._fingerprinter.fingerprint_and_encode(
                 food_cmpd.smiles, self.model.exepected_encoding)
-            yield food_cmpd, self.model.predict(encoded_cmpd)
+            yield food_cmpd, self.model.calc_score(encoded_cmpd)
 
     def sort_predicted_bioactive_food_cmpds(self, food_cmpd_source:
                                             FoodCmpdSource
