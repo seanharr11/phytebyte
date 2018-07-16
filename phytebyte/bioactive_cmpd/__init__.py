@@ -1,6 +1,7 @@
 from .types import (
     BioactiveCompound,
     CompoundBioactivity)
+from .model_input_loader import ModelInputLoader
 
 
-__all__ = ['BioactiveCompound', 'CompoundBioactivity']
+__all__ = ['BioactiveCompound', 'CompoundBioactivity', 'ModelInputLoader']
