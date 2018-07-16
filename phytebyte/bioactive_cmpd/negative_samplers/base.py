@@ -23,6 +23,18 @@ class NegativeSampler(ABC):
 
         self._sample_encoding = None
 
+    @classmethod
+    def create(cls, negative_sampler_name: str,
+               source: BioactiveCompoundSource,
+               fingerprinter: Fingerprinter,
+               *args, **kwargs):
+        if negative_sampler_name == 'Tanimoto':
+            from .tanimoto_thresh import TanimotoThreshNegativeSampler
+            return TanimotoThreshNegativeSampler(
+                source, fingerprinter, *args, **kwargs)
+        else:
+            raise NotImplementedError
+
     def set_sample_encoding(self, encoding: str):
         self._sample_encoding = encoding
 
