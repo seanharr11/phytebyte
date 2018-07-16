@@ -2,15 +2,15 @@ from abc import ABC, abstractmethod
 
 
 from phytebyte.modeling.input import BinaryClassifierInput
-from .random_forest import RandomForestBinaryClassifierModel
-from .tanimoto import TanimotoBinaryClassifierModel
 
 
 class BinaryClassifierModel(ABC):
     def create(self, name, *args, **kwargs):
         if name == "Random Forest":
+            from .random_forest import RandomForestBinaryClassifierModel
             return RandomForestBinaryClassifierModel(*args, **kwargs)
         elif name == "Tanimoto":
+            from .tanimoto import TanimotoBinaryClassifierModel
             return TanimotoBinaryClassifierModel(*args, **kwargs)
         else:
             raise NotImplementedError
