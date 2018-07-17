@@ -7,10 +7,15 @@ from .modeling.models import BinaryClassifierModel
 from .food_cmpd import FoodCmpdSource, FoodCmpd
 from .fingerprinters import Fingerprinter
 
+import logging
 from typing import List, Iterator, Tuple
 
 
 class PhyteByte():
+    logger = logging.getLogger(__name__)
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.INFO)
+
     def __init__(self,
                  source: BioactiveCompoundSource,
                  target_input: TargetInput,
@@ -69,6 +74,26 @@ class PhyteByte():
             neg_sample_size_factor, self._fingerprinter)
         binary_classifier_model.train(binary_classifier_input, *args, **kwargs)
         self.model = binary_classifier_model
+
+    def evaluate_models(self,
+                        model_type: str,
+                        neg_sample_size_factor: int,
+                        true_threshold: float,
+                        *args,
+                        **kwargs) -> List[float]:
+        binary_classifier_model = BinaryClassifierModel.create(model_type)
+        mdl = ModelInputLoader(self._source, self._negative_sampler,
+                               self._positive_clusterer, self._target_input,
+                               binary_classifier_model.expected_encoding)
+        binary_classifier_inputs = mdl.load(
+            neg_sample_size_factor, self._fingerprinter)
+        self.logger.info(
+            f"Found '{len(binary_classifier_inputs)}' Clusters...evaluating")
+        return [binary_classifier_model.evaluate(binary_classifier_input,
+                                                 true_threshold,
+                                                 *args,
+                                                 **kwargs)
+                for binary_classifier_input in binary_classifier_inputs]
 
     def predict_bioactive_food_cmpd_iter(self,
                                          food_cmpd_source: FoodCmpdSource
