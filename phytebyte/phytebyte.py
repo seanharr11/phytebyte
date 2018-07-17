@@ -89,11 +89,13 @@ class PhyteByte():
             neg_sample_size_factor, self._fingerprinter)
         self.logger.info(
             f"Found '{len(binary_classifier_inputs)}' Clusters...evaluating")
-        return [binary_classifier_model.evaluate(binary_classifier_input,
-                                                 true_threshold,
-                                                 *args,
-                                                 **kwargs)
-                for binary_classifier_input in binary_classifier_inputs]
+        f1_scores = [binary_classifier_model.evaluate(binary_classifier_input,
+                                                      true_threshold,
+                                                      *args,
+                                                      **kwargs)
+                     for binary_classifier_input in binary_classifier_inputs]
+        self.model = binary_classifier_model
+        return f1_scores
 
     def predict_bioactive_food_cmpd_iter(self,
                                          food_cmpd_source: FoodCmpdSource
@@ -101,8 +103,9 @@ class PhyteByte():
         food_cmpd_iter = food_cmpd_source.fetch_all_cmpds()
         for food_cmpd in food_cmpd_iter:
             encoded_cmpd = self._fingerprinter.fingerprint_and_encode(
-                food_cmpd.smiles, self.model.exepected_encoding)
-            yield food_cmpd, self.model.calc_score(encoded_cmpd)
+                food_cmpd.smiles, self.model.expected_encoding)
+            if encoded_cmpd is not None:
+                yield food_cmpd, self.model.calc_score(encoded_cmpd)
 
     def sort_predicted_bioactive_food_cmpds(self, food_cmpd_source:
                                             FoodCmpdSource

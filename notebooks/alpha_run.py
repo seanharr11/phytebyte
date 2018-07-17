@@ -17,7 +17,11 @@ pb.set_negative_sampler('Tanimoto', Fingerprinter.create('daylight'))
 pb.set_positive_clusterer('doesnt matter still',
                           Fingerprinter.create('daylight'))
 pb.set_fingerprinter("daylight")
-
-pb.train_model('Random Forest', 10)
-food_cmpd_source = FoodbFoodCmpdSource(os.enviro['FOODB_URL'])
-print(next(pb.sort_predicted_bioactive_food_cmpds(food_cmpd_source)))
+f1_scores = pb.evaluate_models('Random Forest',
+                               neg_sample_size_factor=1,
+                               true_threshold=.8)
+print(f"F1: {f1_scores}")
+food_cmpd_source = FoodbFoodCmpdSource(os.environ['FOODB_URL'])
+food_cmpds_sorted = pb.sort_predicted_bioactive_food_cmpds(food_cmpd_source)
+for i, food_cmpd in enumerate(food_cmpds_sorted[:25]):
+    print(f"{i}. {str(food_cmpd)}")

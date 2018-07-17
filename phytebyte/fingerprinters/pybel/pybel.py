@@ -10,9 +10,10 @@ from .io import PybelDeserializer
 class PybelFingerprinter(Fingerprinter, PybelDeserializer, ABC):
     def smiles_to_nparray(self, smiles: str):
         fp = self.smiles_to_fingerprint(smiles)
-        arr = np.zeros(self._pybel_fp_length, dtype=np.uint8)
-        arr[fp.bits] = True
-        return arr
+        if fp:
+            arr = np.zeros(self._pybel_fp_length, dtype=np.uint8)
+            arr[fp.bits] = True
+            return arr
 
     def smiles_to_bitarray(self, smiles: str):
         fp = self.smiles_to_fingerprint(smiles)
@@ -20,11 +21,15 @@ class PybelFingerprinter(Fingerprinter, PybelDeserializer, ABC):
 
     def smiles_to_fingerprint(self, smiles: str):
         mol = self.smiles_to_molecule(smiles)
-        fp = self._molecule_to_fingerprint(mol)
-        return fp
+        if mol:
+            fp = self._molecule_to_fingerprint(mol)
+            return fp
 
     def smiles_to_molecule(self, smiles: str):
-        mol = pybel.readstring("smi", smiles)
+        try:
+            mol = pybel.readstring("smi", smiles)
+        except Exception as e:
+            return None
         return mol
 
     def _molecule_to_fingerprint(self, mol):
