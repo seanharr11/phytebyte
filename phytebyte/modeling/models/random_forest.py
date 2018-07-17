@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 
 from phytebyte.modeling.input import BinaryClassifierInput
@@ -13,5 +14,6 @@ class RandomForestBinaryClassifierModel(BinaryClassifierModel):
         self._rfc = RandomForestClassifier()
         self._rfc.fit(*bci.index(idx))
 
-    def calc_score(self, encoded_cmpd):
-        return self._rfc.predict_proba(encoded_cmpd)[0][0]
+    def calc_score(self, encoded_cmpd: np.ndarray) -> float:
+        return self._rfc.predict_proba(
+            encoded_cmpd.reshape(1, -1))[0][1]
