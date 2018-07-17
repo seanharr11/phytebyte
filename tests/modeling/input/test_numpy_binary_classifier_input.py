@@ -26,6 +26,10 @@ def nbci(pos, neg):
     return NumpyBinaryClassifierInput(pos, neg)
 
 
+def test__len__(nbci):
+    assert len(nbci) == 20
+
+
 def test_index(nbci):
     subset = np.array([5,15])
     X, y = nbci.index(subset)

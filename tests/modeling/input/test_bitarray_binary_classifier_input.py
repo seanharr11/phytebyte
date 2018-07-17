@@ -29,6 +29,10 @@ def bbci(pos, neg):
     return BitarrayBinaryClassifierInput(pos, neg)
 
 
+def test__len__(bbci):
+    assert len(bbci) == 20
+
+
 def test_index(bbci):
     subset = np.array([5, 15])
     X, y = bbci.index(subset)

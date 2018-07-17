@@ -6,6 +6,10 @@ from typing import List
 
 class BinaryClassifierInput(ABC):
     @abstractmethod
+    def __len__(self):
+        pass
+
+    @abstractmethod
     def index(self, idx):
         """
         Given a set of indices (corresponding to a training set, for example),
@@ -20,17 +24,11 @@ class NumpyBinaryClassifierInput(BinaryClassifierInput):
         self._y = np.append(np.ones(len(positives)),
                             np.zeros(len(negatives)))
 
+    def __len__(self):
+        return len(self._X)
+
     def index(self, idx):
         return (self._X[idx,], self._y[idx])
-
-    def split(self, test_size=.3, rand_state_seed=100) -> None:
-        ss = ShuffleSplit(n_splits=1, test_size=test_size)
-        self._train_idx, self._test_idx = next(
-            ShuffleSplit(
-                n_splits=1,
-                test_size=test_size,
-                random_state=rand_state_seed)
-            .split(self._X))
 
 
 class BitarrayBinaryClassifierInput(BinaryClassifierInput):
@@ -38,6 +36,9 @@ class BitarrayBinaryClassifierInput(BinaryClassifierInput):
         self._X = positives + negatives
         self._y = np.append(np.ones(len(positives)),
                             np.zeros(len(negatives)))
+
+    def __len__(self):
+        return len(self._X)
 
     def index(self, idx):
         return ([self._X[i] for i in idx],
