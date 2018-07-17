@@ -31,6 +31,8 @@ def mock_positive_clusterer():
 @pytest.fixture
 def mock_target_input():
     m = Mock()
+    m.fetch_bioactive_cmpds = MagicMock(
+        return_value=[lambda: Mock()])
     return m
 
 
