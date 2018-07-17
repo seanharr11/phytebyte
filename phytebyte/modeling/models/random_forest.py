@@ -1,5 +1,4 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import fbeta_score
 
 from phytebyte.modeling.input import BinaryClassifierInput
 from .binary_classifier import BinaryClassifierModel
