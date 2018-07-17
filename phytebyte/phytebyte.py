@@ -49,8 +49,6 @@ class PhyteByte():
                                **kwargs):
         self._positive_clusterer = Clusterer.create(
             clusterer_name,
-            [lazy_cmpd_callable() for lazy_cmpd_callable in
-             self._target_input.fetch_bioactive_cmpds(self._source)],
             fingerprinter,
             *args,
             **kwargs)
