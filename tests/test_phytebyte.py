@@ -21,8 +21,10 @@ def mock_positive_clusterer():
 
 
 @pytest.fixture
-def mock_target_input():
+def mock_target_input(mock_source):
     mock_target_input = Mock()
+    mock_target_input.fetch_bioactive_cmpds = MagicMock(
+            return_value=mock_source)
     return mock_target_input
 
 
@@ -116,14 +118,12 @@ def phytebyte_fixture(monkeypatch,
     monkeypatch.setattr("phytebyte.phytebyte.Fingerprinter",
                         mock_base_fingerprinter)
     # Builder pattern
-    pb = PhyteByte()
+    pb = PhyteByte(mock_source, mock_target_input)
     # Factory method proxies
-    pb.set_positive_clusterer("Whocares")
-    pb.set_negative_sampler("Not me!")
+    pb.set_positive_clusterer("Whocares", mock_fingerprinter)
+    pb.set_negative_sampler("Not me!", mock_fingerprinter)
     pb.set_fingerprinter("Doin't care!")
 
-    pb.set_source(mock_source)
-    pb.set_target_input(mock_target_input)
     return pb
 
 
@@ -134,54 +134,47 @@ def phytebyte_fixture_with_model(phytebyte_fixture):
     return phytebyte_fixture
 
 
-def test_init():
-    pb = PhyteByte()
+def test_init(mock_source, mock_target_input):
+    pb = PhyteByte(mock_source, mock_target_input)
     assert pb.model is None
 
 
-def test_set_negative_sampler(monkeypatch, mock_negative_sampler):
+def test_set_negative_sampler(monkeypatch, mock_source, mock_target_input,
+                              mock_negative_sampler, mock_fingerprinter):
     mock_base_neg_sampler = Mock()
     mock_base_neg_sampler.create = MagicMock(
          return_value=mock_negative_sampler)
     monkeypatch.setattr("phytebyte.phytebyte.NegativeSampler",
                         mock_base_neg_sampler)
-    pb = PhyteByte()
-    pb.set_negative_sampler("Tanimoto")
+    pb = PhyteByte(mock_source, mock_target_input)
+    pb.set_negative_sampler("Tanimoto", mock_fingerprinter)
     assert pb._negative_sampler == mock_negative_sampler
 
 
-def test_set_positive_clusterer(monkeypatch, mock_positive_clusterer):
+def test_set_positive_clusterer(monkeypatch, mock_source, mock_target_input,
+                                mock_positive_clusterer):
     mock_base_pos_clusterer = Mock()
     mock_base_pos_clusterer.create = MagicMock(
         return_value=mock_positive_clusterer)
     monkeypatch.setattr("phytebyte.phytebyte.Clusterer",
                         mock_base_pos_clusterer)
-    pb = PhyteByte()
-    pb.set_positive_clusterer("Foobar!")
+    pb = PhyteByte(mock_source, mock_target_input)
+    pb.set_positive_clusterer("Foobar!", mock_fingerprinter)
     assert pb._positive_clusterer == mock_positive_clusterer
 
 
-def test_set_fingerprinter(monkeypatch, mock_fingerprinter):
+def test_set_fingerprinter(monkeypatch,
+                           mock_fingerprinter,
+                           mock_source,
+                           mock_target_input):
     mock_base_fingerprinter = Mock()
     mock_base_fingerprinter.create = MagicMock(
         return_value=mock_fingerprinter)
     monkeypatch.setattr("phytebyte.phytebyte.Fingerprinter",
                         mock_base_fingerprinter)
-    pb = PhyteByte()
-    pb.set_fingerprinter("no one cares!!!")
+    pb = PhyteByte(mock_source, mock_target_input)
+    pb.set_fingerprinter("no one cares!!!",)
     assert pb._fingerprinter == mock_fingerprinter
-
-
-def test_set_target_input(mock_target_input):
-    pb = PhyteByte()
-    pb.set_target_input(mock_target_input)
-    assert pb._target_input == mock_target_input
-
-
-def test_set_source(mock_source):
-    pb = PhyteByte()
-    pb.set_source(mock_source)
-    assert pb._source == mock_source
 
 
 def test_train_model_calls__BinaryClassifierModel_train(
@@ -231,5 +224,5 @@ def test_predict_bioactive_food_cmpd_iter__calls_fetch_all_cmpds(
 
 
 @pytest.mark.xfail
-def test_load_config():
-    PhyteByte("path_to_config")
+def test_load_config(mock_source, mock_target_input):
+    PhyteByte(mock_source, mock_target_input, "path_to_config")

@@ -11,14 +11,19 @@ from typing import List, Iterator, Tuple
 
 
 class PhyteByte():
-    def __init__(self, config_file_path: str=None):
-        self.model = None
+    def __init__(self,
+                 source: BioactiveCompoundSource,
+                 target_input: TargetInput,
+                 config_file_path: str=None):
+        self._target_input = target_input
+        self._source = source
+
         self._config_file_path = config_file_path
         self._negative_sampler = None
         self._positive_clusterer = None
-        self._target_input = None
-        self._source = None
         self._fingerprinter = None
+
+        self.model = None
 
         if config_file_path:
             self._load_config()
@@ -26,23 +31,31 @@ class PhyteByte():
     def _load_config(self):
         raise NotImplementedError
 
-    def set_negative_sampler(self, negative_sampler_name: str,
-                             *args, **kwargs):
+    def set_negative_sampler(self,
+                             negative_sampler_name: str,
+                             fingerprinter: Fingerprinter,
+                             *args,
+                             **kwargs):
         self._negative_sampler = NegativeSampler.create(
-            negative_sampler_name, *args, **kwargs)
+            negative_sampler_name,
+            self._source,
+            fingerprinter,
+            *args, **kwargs)
 
-    def set_positive_clusterer(self, clusterer_name: str, *args, **kwargs):
+    def set_positive_clusterer(self,
+                               clusterer_name: str,
+                               fingerprinter: Fingerprinter,
+                               *args,
+                               **kwargs):
         self._positive_clusterer = Clusterer.create(
-            clusterer_name, *args, **kwargs)
+            clusterer_name,
+            self._target_input.fetch_bioactive_cmpds(self._source),
+            fingerprinter,
+            *args,
+            **kwargs)
 
     def set_fingerprinter(self, fingerprinter_name: str):
         self._fingerprinter = Fingerprinter.create(fingerprinter_name)
-
-    def set_target_input(self, target_input: TargetInput):
-        self._target_input = target_input
-
-    def set_source(self, source: BioactiveCompoundSource):
-        self._source = source
 
     def train_model(self,
                     model_type: str,

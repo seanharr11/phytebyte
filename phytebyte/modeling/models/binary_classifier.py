@@ -5,7 +5,8 @@ from phytebyte.modeling.input import BinaryClassifierInput
 
 
 class BinaryClassifierModel(ABC):
-    def create(self, name, *args, **kwargs):
+    @classmethod
+    def create(cls, name, *args, **kwargs):
         if name == "Random Forest":
             from .random_forest import RandomForestBinaryClassifierModel
             return RandomForestBinaryClassifierModel(*args, **kwargs)
