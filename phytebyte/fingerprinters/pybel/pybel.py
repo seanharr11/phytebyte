@@ -16,7 +16,7 @@ class PybelFingerprinter(Fingerprinter, PybelDeserializer, ABC):
 
     def smiles_to_bitarray(self, smiles: str):
         fp = self.smiles_to_fingerprint(smiles)
-        return bitarray(fp.bits)
+        return bitarray([i in fp.bits for i in range(self._pybel_fp_length)])
 
     def smiles_to_fingerprint(self, smiles: str):
         mol = self.smiles_to_molecule(smiles)
