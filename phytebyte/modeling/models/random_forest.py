@@ -15,5 +15,7 @@ class RandomForestBinaryClassifierModel(BinaryClassifierModel):
         self._rfc.fit(*bci.index(idx))
 
     def calc_score(self, encoded_cmpd: np.ndarray) -> float:
-        return self._rfc.predict_proba(
-            encoded_cmpd.reshape(1, -1))[0][1]
+        prob_results = self._rfc.predict_proba(
+            encoded_cmpd.reshape(1, -1))
+        positive_class_score = prob_results[0][1]
+        return positive_class_score
