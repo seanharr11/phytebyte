@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Iterator, List
+from typing import List
 
 from phytebyte.bioactive_cmpd.types import BioactiveCompound
 from phytebyte.fingerprinters.base import Fingerprinter
@@ -18,5 +18,6 @@ class Clusterer(ABC):
         return PositiveClusterer(fingerprinter)
 
     @abstractmethod
-    def find_clusters(self, pos_cmpd_list: List[BioactiveCompound]) -> List[Cluster]:
+    def find_clusters(self, pos_cmpd_list: List[BioactiveCompound]
+                      ) -> List[Cluster]:
         pass

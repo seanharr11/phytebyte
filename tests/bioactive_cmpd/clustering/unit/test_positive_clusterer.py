@@ -32,7 +32,7 @@ def bc():
 @pytest.fixture
 def pc(bc):
     fingerprinter = MockFingerprinter()
-    return PositiveClusterer([bc], fingerprinter)
+    return PositiveClusterer(fingerprinter)
 
 
 @pytest.fixture
@@ -44,30 +44,27 @@ def mock_dbscan():
 
 
 def test_init(pc):
-    assert pc._pos_cmpds
     assert pc._fingerprinter
-    assert pc._data
-    assert isinstance(pc._data[0], np.ndarray)
 
 
 def test_run_dbscan(pc):
-    pc._data = np.zeros((10, 2))
-    labels = pc.run_dbscan(100)
+    data = np.zeros((10, 2))
+    labels = pc.run_dbscan(100, data)
     assert isinstance(labels, np.ndarray)
-    assert len(labels) == pc._data.shape[0]
+    assert len(labels) == data.shape[0]
 
 
 def test_get_silhouette(pc):
-    pc._data = np.zeros((10, 2))
-    ss = pc.get_silhouette([0, 1] * 5)
+    data = np.zeros((10, 2))
+    ss = pc.get_silhouette([0, 1] * 5, data)
     assert isinstance(ss, np.float64)
 
 
 def test_silhouette_series(pc):
-    pc._data = np.zeros((10, 2))
+    data = np.zeros((10, 2))
     pc.run_dbscan = MagicMock(return_value=np.zeros(10))
     pc.get_silhouette = MagicMock(return_value=0.2)
-    ss_seq = pc.silhouette_series([1, 10, 100])
+    ss_seq = pc.silhouette_series([1, 10, 100], data)
     assert isinstance(ss_seq, np.ndarray)
     assert np.all((ss_seq == -2) |
                   np.logical_and(ss_seq >= -1, ss_seq <= 1))
@@ -75,25 +72,11 @@ def test_silhouette_series(pc):
 
 def test_find_clusters(pc, bc):
     pc.silhouette_series = MagicMock(return_value=np.array([0.1, 0.2, 0.1]))
-    assert len(pc.find_clusters()) == 1
+    assert len(pc.find_clusters([bc])) == 1
     pc.silhouette_series = MagicMock(return_value=np.array([0, 0.1, 0.7]))
     with pytest.raises(Exception):
-        pc.find_clusters()
+        pc.find_clusters([bc])
     pc.silhouette_series = MagicMock(return_value=np.array([0.1, 0.7, 0.1]))
     pc.run_dbscan = MagicMock(return_value=np.zeros(10))
-    pc._pos_cmpds = [bc] * 10
-    assert isinstance(pc.find_clusters(), list)
-    assert all([isinstance(c, Cluster) for c in pc.find_clusters()])
-    #assert len(pc.find_clusters()) == len(pc.silhouette_series())
-
-
-# def test_finder_returns_list(pc):
-#    pos_clusters = pc.find_clusters()
-#    assert isinstance(pos_clusters, list)
-
-
-# def test_finder_returns_list_of_bioactive_cmpds(pc):
-#    pos_clusters = pc.find_clusters()
-#    # print(type(pos_clusters[0]), type(pos_clusters[0][0]))
-#    assert isinstance(pos_clusters[0], list)
-#    assert isinstance(pos_clusters[0][0], BioactiveCompound)
+    assert isinstance(pc.find_clusters([bc] * 10), list)
+    assert all([isinstance(c, Cluster) for c in pc.find_clusters([bc] * 10)])
