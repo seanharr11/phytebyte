@@ -16,6 +16,8 @@ def mock_row_iter():
 def mock_connection(mock_row_iter):
     conn = Mock()
     conn.execute = MagicMock(return_value=mock_row_iter)
+    conn.__enter__ = Mock(return_value=conn)
+    conn.__exit__ = Mock(return_value=None)
     return conn
 
 
@@ -96,7 +98,15 @@ def test_fetch_with_compound_names(cbc_source, mock_bioactive_compound):
 
 def test_random_compounds_exc_smiles(monkeypatch, cbc_source):
     mock_rows = [['CC=N'], ['CC=O']]
-    cbc_source.conn.execute = MagicMock(return_value=mock_rows)
+    mock_conn = Mock()
+    mock_conn.execute = MagicMock(return_value=mock_rows)
+    mock_conn.__enter__ = Mock(return_value=mock_conn)
+    mock_conn.__exit__ = Mock(return_value=None)
+    mock_engine = Mock()
+    mock_engine.connect = MagicMock(return_value=mock_conn)
+    mock_engine.execution_options = MagicMock()
+    monkeypatch.setattr("phytebyte.bioactive_cmpd.sources.base.create_engine",
+                        MagicMock(return_value=mock_engine))
     smiles_iter = cbc_source.fetch_random_compounds_exc_smiles(100, ['CC=P'])
     assert hasattr(smiles_iter, '__next__')
     first_smile = next(smiles_iter)
