@@ -11,10 +11,9 @@ class Cluster():
                  **kwargs):
         self._bioactive_cmpds = bioactive_cmpds
 
-    @property
     def get_encoded_cmpds(self, encoding: str,
                           fingerprinter: Fingerprinter) -> List:
-        return [fingerprinter.fingerprint_and_encode(cmpd.smiles)
+        return [fingerprinter.fingerprint_and_encode(cmpd.smiles, encoding)
                 for cmpd in self._bioactive_cmpds]
 
     @property
