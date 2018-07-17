@@ -5,10 +5,15 @@ from typing import List, Iterator, Callable
 from phytebyte.bioactive_cmpd.types import BioactiveCompound
 
 
-class BioactiveCompoundSource(ABC):
+class BioactiveCompoundSource(ABC, object):
     def __init__(self, db_url):
-        engine = create_engine(db_url)
-        self.conn = engine.connect()
+        self.db_url = db_url
+
+    @property
+    def engine(self):
+        engine = create_engine(self.db_url)
+        engine.execution_options(stream_results=True)
+        return engine
 
     @abstractmethod
     def fetch_with_gene_tgts(self, gene_tgts: List[str]) -> \

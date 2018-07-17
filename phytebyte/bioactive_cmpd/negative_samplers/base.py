@@ -10,7 +10,7 @@ class NotEnoughSamples(Exception):
     pass
 
 
-class NegativeSampler(ABC):
+class NegativeSampler(ABC, object):
     def __init__(self,
                  source: BioactiveCompoundSource,
                  fingerprinter: Fingerprinter,

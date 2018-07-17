@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 from bitarray import bitarray
-import logging
 import numpy as np
 from typing import List
 
 
-class Fingerprinter(ABC):
+class Fingerprinter(ABC, object):
     """ A 'Fingerprinter' is responsible for converting serialized compound
     representations (like SMiLES str's), to deserialized Fingerprint objects
     (i.e. Daylight Fingerprint), and finally returning a stripped-down
@@ -13,9 +12,6 @@ class Fingerprinter(ABC):
 
     Factory method 'create()' instantiates each Fingerprinter implementation.
     """
-    logging.basicConfig()
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
 
     def __init__(self, *args, **kwargs):
         pass
