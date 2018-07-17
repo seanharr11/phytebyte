@@ -30,12 +30,15 @@ class ModelInputLoader():
         assert isinstance(neg_sample_size_factor, int)
         pos_cmpd_iter = self._target_input.fetch_bioactive_cmpds(
             self._source)
+        bioactive_cmpd_list = [lazy_cmpd_callable() for lazy_cmpd_callable in
+                               self._target_input.fetch_bioactive_cmpds(
+                                   self._source)]
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
-            pos_cmpd_iter)
-
+            bioactive_cmpd_list)
         self._negative_sampler.set_sample_encoding(self._encoding)
         self._neg_cmpd_iters = self._get_neg_bioactive_cmpd_iters(
-            neg_sample_size_factor)
+            neg_sample_size_factor,
+            output_fingerprinter)
         # Iterators turned into List below!
         self.model_inputs = [
             self._create_binary_classifier_input(clust, neg_cmpd_iter,
