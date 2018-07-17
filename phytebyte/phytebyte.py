@@ -49,7 +49,8 @@ class PhyteByte():
                                **kwargs):
         self._positive_clusterer = Clusterer.create(
             clusterer_name,
-            self._target_input.fetch_bioactive_cmpds(self._source),
+            [lazy_cmpd_callable() for lazy_cmpd_callable in
+             self._target_input.fetch_bioactive_cmpds(self._source)],
             fingerprinter,
             *args,
             **kwargs)
@@ -59,7 +60,7 @@ class PhyteByte():
 
     def train_model(self,
                     model_type: str,
-                    neg_sample_size: int,
+                    neg_sample_size_factor: int,
                     *args,
                     **kwargs):
         binary_classifier_model = BinaryClassifierModel.create(model_type)
@@ -67,7 +68,7 @@ class PhyteByte():
                                self._positive_clusterer, self._target_input,
                                binary_classifier_model.expected_encoding)
         binary_classifier_input = mdl.load(
-            neg_sample_size, self._fingerprinter)
+            neg_sample_size_factor, self._fingerprinter)
         binary_classifier_model.train(binary_classifier_input, *args, **kwargs)
         self.model = binary_classifier_model
 
