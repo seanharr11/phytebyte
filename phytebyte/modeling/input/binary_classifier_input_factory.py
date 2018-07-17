@@ -3,7 +3,8 @@ from .binary_classifier_input import (
 
 
 class BinaryClassifierInputFactory():
-    def create(self, encoding: str, positives, negatives, *args, **kwargs):
+    @classmethod
+    def create(cls, encoding: str, positives, negatives, *args, **kwargs):
         if encoding == 'numpy':
             return NumpyBinaryClassifierInput(
                 positives=positives,
