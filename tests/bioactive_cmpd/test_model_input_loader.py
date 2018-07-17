@@ -67,8 +67,8 @@ def test_init(mock_source, mock_negative_sampler,
 
 
 def test_load(model_input_loader, mock_binary_classifier_input):
-    model_input_loader.load(2, output_fingerprinter)
-    assert model_input_loader.model_inputs == [
+    model_inputs = model_input_loader.load(2, output_fingerprinter)
+    assert model_inputs == [
         mock_binary_classifier_input] * 2
 
 
