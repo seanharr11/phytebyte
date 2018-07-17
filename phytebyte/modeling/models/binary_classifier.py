@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from sklearn.model_selection import ShuffleSplit
 from sklearn.metrics import fbeta_score
 
 from phytebyte.modeling.input import BinaryClassifierInput
@@ -18,7 +17,6 @@ class BinaryClassifierModel(ABC):
         else:
             raise NotImplementedError
 
-
     @property
     @abstractmethod
     def expected_encoding(self) -> str:
@@ -28,34 +26,34 @@ class BinaryClassifierModel(ABC):
         """
         pass
 
-
     @abstractmethod
-    def train(self, model_input: BinaryClassifierInput, idx: np.ndarray) -> None:
+    def train(self, model_input: BinaryClassifierInput,
+              idx: np.ndarray) -> None:
         """ Takes `model_input` of type `BinaryClassifierInput` and a set of
-        training indices, and uses the information to update internal state, 
+        training indices, and uses the information to update internal state,
         by creating and training a model using t.
         """
         pass
 
-
-    @ abstractmethod
+    @abstractmethod
     def calc_score(self, encoded_cmpd) -> float:
         """ Takes an `encoded_cmpd` and returns a model-specific score related
         to the prediction confidence.
         """
         pass
 
-
     def predict(self, encoded_cmpd, thresh) -> float:
         """ Takes an `encoded_cmpd` and a score threshold and returns a hard
-        classification. 
+        classification.
         """
         return self.calc_score(encoded_cmpd) > thresh
 
-
-    def evaluate(self, bci: BinaryClassifierInput, thresh, 
+    def evaluate(self,
+                 bci: BinaryClassifierInput,
+                 thresh,
                  beta=1.0,
-                 test_size=.3, rand_state_seed=100):
+                 test_size=.3,
+                 rand_state_seed=100):
         """Split train/test, train, predict test, return metric.
             Params:
                 - `beta` :float - The F_beta value, where a high beta (> 1)
@@ -66,8 +64,6 @@ class BinaryClassifierModel(ABC):
                 - `rand_state_seed` :int - For reproducibility of train/test
                 splitting
         """
-        # ss = ShuffleSplit(n_splits=1, test_size=test_size, random_state=rand_state_seed)
-        # train_idx, test_idx = ss.split(nbci.index(np.arange()
         test_idx = np.random.choice(
             np.arange(len(bci)), size=round(test_size * len(bci)),
             replace=False)
