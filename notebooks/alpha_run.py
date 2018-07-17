@@ -18,6 +18,6 @@ pb.set_positive_clusterer('doesnt matter still',
                           Fingerprinter.create('daylight'))
 pb.set_fingerprinter("daylight")
 
-pb.train_model('Tanimoto', 100)
+pb.train_model('Random Forest', 10)
 food_cmpd_source = FoodbFoodCmpdSource(os.enviro['FOODB_URL'])
 print(next(pb.sort_predicted_bioactive_food_cmpds(food_cmpd_source)))
