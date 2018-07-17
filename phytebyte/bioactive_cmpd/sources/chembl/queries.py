@@ -122,7 +122,7 @@ class ChemblRandomCompoundSmilesQuery(Query):
 
     @property
     def _select(self):
-        return select([CompoundStructure.canonical_smiles]).distinct()
+        return select([CompoundStructure.canonical_smiles, func.random()]).distinct()
 
     @property
     def _select_from(self):
