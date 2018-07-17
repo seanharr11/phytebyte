@@ -2,8 +2,6 @@ import pytest
 from unittest.mock import Mock, MagicMock
 import numpy as np
 
-from phytebyte.modeling.input.binary_classifier_input \
-        import NumpyBinaryClassifierInput
 from phytebyte.modeling.models.random_forest import (
     RandomForestBinaryClassifierModel)
 
@@ -13,7 +11,8 @@ def nbci():
     nbci = Mock()
     nbci.index = MagicMock(
         return_value=(np.random.randn(10, 10),
-                      np.ones(10)))
+                      np.append(
+                          np.ones(5), np.zeros(5))))
     return nbci
 
 
@@ -33,11 +32,13 @@ def test_train(rfbcm, nbci):
 
 def test_calc_score(rfbcm, nbci):
     rfbcm.train(nbci, np.arange(5))
-    score = rfbcm.calc_score(np.zeros((1, 10)))
+    score = rfbcm.calc_score(np.append(np.zeros(5), np.ones(5)))
     assert isinstance(score, float)
 
 
 def test_predict(rfbcm, nbci):
     rfbcm.train(nbci, np.arange(5))
-    pred_class = rfbcm.predict(np.zeros((1, 10)), 0.5)
+    pred_class = rfbcm.predict(
+        np.append(np.zeros(5), np.ones(5)),
+        0.5)
     assert pred_class in [0, 1]
