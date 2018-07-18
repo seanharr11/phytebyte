@@ -1,3 +1,4 @@
+import logging
 from typing import List, Iterator
 
 from phytebyte.bioactive_cmpd.sources.base import BioactiveCompoundSource
@@ -10,6 +11,10 @@ from phytebyte.modeling.input import (
 
 
 class ModelInputLoader():
+    logger = logging.getLogger(__name__)
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.INFO)
+
     def __init__(self,
                  source: BioactiveCompoundSource,
                  negative_sampler: NegativeSampler,
@@ -32,8 +37,10 @@ class ModelInputLoader():
         bioactive_cmpd_list = [lazy_cmpd_callable() for lazy_cmpd_callable in
                                self._target_input.fetch_bioactive_cmpds(
                                    self._source)]
+        self.logger.info(f"Found '{len(bioactive_cmpd_list)}' pos samples.")
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
             bioactive_cmpd_list)
+        self.logger.info(f"Found '{len(self._pos_cmpd_clusters)}' clusters.")
         self._negative_sampler.set_sample_encoding(self._encoding)
         self._neg_cmpd_iters = self._get_neg_bioactive_cmpd_iters(
             neg_sample_size_factor,
@@ -61,11 +68,13 @@ class ModelInputLoader():
                                         neg_cmpd_iter: Iterator,
                                         output_fingerprinter: Fingerprinter
                                         ) -> BinaryClassifierInput:
+        neg_cmpds = list(neg_cmpd_iter)
+        self.logger.info(f"Found '{len(neg_cmpds)}' neg samples")
         return BinaryClassifierInputFactory.create(
             encoding=self._encoding,
             positives=cluster.get_encoded_cmpds(self._encoding,
                                                 output_fingerprinter),
-            negatives=list(neg_cmpd_iter))
+            negatives=neg_cmpds)
 
     @property
     def positive_clusters(self):
