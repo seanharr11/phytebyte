@@ -32,13 +32,14 @@ class FoodbFoodCmpdQuery(Query):
     def _select_from(self):
         return Compound.__table__
 
+
 class FoodbFoodsFromCmpdQuery(Query):
     def __init__(self,
                  food_cmpd_uid: List[int]):
         self._food_cmpd_uid = food_cmpd_uid
         assert self._food_cmpd_uid is None or isinstance(
             self._food_cmpd_uid, int)
-    
+
     def __repr__(self):
         return f"""<FoodbFoodsFromCmpdQuery
             {self._food_cmpd_uid}>"""
@@ -81,4 +82,4 @@ class FoodbFoodsFromCmpdQuery(Query):
             desc(Content.standard_content),
             desc(Content.orig_max),
             desc(Content.orig_min))
-        return and_(*order_by_tuple)
+        return order_by_tuple

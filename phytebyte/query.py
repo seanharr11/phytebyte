@@ -13,11 +13,12 @@ class Query(ABC):
     def build(self) -> select:
         query = self._select\
                     .select_from(self._select_from)\
-                    .where(self._whereclause)\
-                    .order_by(self._order_by)\
-                    .group_by(*self._group_by)\
-                    .limit(self._limit)
-        if self._having:
+                    .where(self._whereclause)
+        if self._order_by is not None:
+            query = query.order_by(*self._order_by)
+        query = query.group_by(*self._group_by)\
+                     .limit(self._limit)
+        if self._having is not None:
             query = query.having(self._having)
         return query
 
