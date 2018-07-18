@@ -5,7 +5,7 @@ from typing import List
 FoodContent = namedtuple(
     "FoodContent", ["food_name", "food_descr", "food_part", "content", "unit",
                     "min", 'max', 'amount'])
-    
+
 
 class FoodCmpd:
     def __init__(self, source, uid_, smiles, name, descr):
@@ -15,9 +15,12 @@ class FoodCmpd:
         self.name = name
         self.descr = descr
 
+    def __str__(self):
+        return self.print_foods(ignore_if_no_food=True)
+
     @property
     def foods(self) -> List[FoodContent]:
-        return [f for f in source._fetch_foods(self.id)]
+        return [f for f in self.source.fetch_foods(self.uid)]
 
     @staticmethod
     def get_amount(food: FoodContent):
@@ -30,8 +33,8 @@ class FoodCmpd:
         return f"{food.unit}"
 
     def print_foods(self,
-               ignore_if_no_food=False,
-               ignore_if_no_food_content=False):
+                    ignore_if_no_food=False,
+                    ignore_if_no_food_content=False):
         food_bullets = "\n".join(
             [f" - {food.food_name} ({food.food_part}) "
              f"{self.get_amount(food)} {self.get_units(food)}"
