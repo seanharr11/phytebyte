@@ -87,13 +87,12 @@ class PhyteByte():
                                binary_classifier_model.expected_encoding)
         binary_classifier_inputs = mdl.load(
             neg_sample_size_factor, self._fingerprinter)
-        self.logger.info(
-            f"Found '{len(binary_classifier_inputs)}' Clusters...evaluating")
         f1_scores = [binary_classifier_model.evaluate(binary_classifier_input,
                                                       true_threshold,
                                                       *args,
                                                       **kwargs)
                      for binary_classifier_input in binary_classifier_inputs]
+        self.logger.info(f"F1: {f1_scores}")
         self.model = binary_classifier_model
         return f1_scores
 

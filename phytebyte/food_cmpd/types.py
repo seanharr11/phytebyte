@@ -15,9 +15,6 @@ class FoodCmpd:
         self.name = name
         self.descr = descr
 
-    def __str__(self):
-        return self.print_foods(ignore_if_no_food=True)
-
     @property
     def foods(self) -> List[FoodContent]:
         return [f for f in self.source.fetch_foods(self.uid)]
@@ -32,14 +29,14 @@ class FoodCmpd:
     def get_units(food: FoodContent):
         return f"{food.unit}"
 
-    def print_foods(self,
-                    ignore_if_no_food=False,
-                    ignore_if_no_food_content=False):
+    def get_food_info_str(self,
+                          ignore_if_no_food=False,
+                          ignore_if_no_food_content=False):
         food_bullets = "\n".join(
             [f" - {food.food_name} ({food.food_part}) "
              f"{self.get_amount(food)} {self.get_units(food)}"
              for food in self.foods
              if not (ignore_if_no_food_content and not self.get_amount(food))])
-        return "" if not food_bullets and ignore_if_no_food else\
-            f"*Food Compound: {self.name}\n"\
+        return None if not food_bullets and ignore_if_no_food else\
+            f"* Food Compound: {self.name}\n"\
             f"{food_bullets}\n"
