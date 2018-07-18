@@ -10,8 +10,9 @@ class RandomForestBinaryClassifierModel(BinaryClassifierModel):
     def expected_encoding(self) -> str:
         return 'numpy'
 
-    def train(self, bci: BinaryClassifierInput, idx) -> None:
-        self._rfc = RandomForestClassifier()
+    def train(self, bci: BinaryClassifierInput,
+              idx, num_estimators: int=100) -> None:
+        self._rfc = RandomForestClassifier(n_estimators=num_estimators)
         self._rfc.fit(*bci.index(idx))
 
     def calc_score(self, encoded_cmpd: np.ndarray) -> float:
