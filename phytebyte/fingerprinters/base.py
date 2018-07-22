@@ -13,8 +13,8 @@ class Fingerprinter(ABC, object):
     Factory method 'create()' instantiates each Fingerprinter implementation.
     """
 
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, cache=None, *args, **kwargs):
+        self._cache = cache
 
     @classmethod
     def create(cls, fingerprint_name, *args, **kwargs) -> 'Fingerprinter':
@@ -28,7 +28,12 @@ class Fingerprinter(ABC, object):
         return fp_class(*args, **kwargs)
 
     def fingerprint_and_encode(self, smiles: str, encoding: str):
-        if encoding == 'numpy':
+        if self._cache is not None:
+            if self._cache.encoding != encoding:
+                raise Exception("""Provided cache encoding and requested encoding
+                                do not match.""")
+            return self._cache.get(smiles)
+        elif encoding == 'numpy':
             return self.smiles_to_nparray(smiles)
         elif encoding == 'bitarray':
             return self.smiles_to_bitarray(smiles)
