@@ -45,6 +45,11 @@ class PybelFingerprinter(Fingerprinter, PybelDeserializer, ABC):
 
     @property
     @abstractmethod
+    def fp_type(self):
+        pass
+
+    @property
+    @abstractmethod
     def _pybel_fp_name(self):
         pass
 

@@ -6,6 +6,10 @@ from phytebyte.fingerprinters.base import Fingerprinter
 
 
 class SpectrophoreFingerprinter(Fingerprinter, PybelDeserializer):
+    @property
+    def fp_type(self) -> str:
+        return "spectrophore"
+
     def __init__(self):
         self._ob_spectrophore = pybel.ob.OBSpectrophore()
 

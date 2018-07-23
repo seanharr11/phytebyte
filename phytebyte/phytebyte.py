@@ -59,8 +59,9 @@ class PhyteByte():
             *args,
             **kwargs)
 
-    def set_fingerprinter(self, fingerprinter_name: str):
-        self._fingerprinter = Fingerprinter.create(fingerprinter_name)
+    def set_fingerprinter(self, fingerprinter_name: str, cache=None):
+        self._fingerprinter = Fingerprinter.create(fingerprinter_name,
+                                                   cache=cache)
 
     def train_model(self,
                     model_type: str,
