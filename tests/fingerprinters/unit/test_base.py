@@ -14,6 +14,10 @@ def FingerprinterSubclass(mock_bit_string):
 
         def smiles_to_nparray(self, smiles):
             return np.array([bit for bit in mock_bit_string])
+
+        @property
+        def fp_type(self):
+            return 'some_type'
     return FingerprinterSubclass
 
 
@@ -92,7 +96,7 @@ class MockNumpyCache():
     def __init__(self):
         self.encoding = 'numpy'
 
-    def get(self, smiles):
+    def get(self, smiles, fp_type, encoding):
         return 'cache result'
 
 
@@ -106,7 +110,3 @@ def test_fingerprint_and_encode__np_cache(
     print(subclassed_fp_with_np_cache._cache.encoding)
     enc = subclassed_fp_with_np_cache.fingerprint_and_encode('CN=O', 'numpy')
     assert enc == 'cache result'
-    with pytest.raises(Exception):
-        enc = subclassed_fp_with_np_cache.fingerprint_and_encode('CN=O',
-                                                                 'bitarray')
-    

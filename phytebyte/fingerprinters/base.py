@@ -17,7 +17,7 @@ class Fingerprinter(ABC, object):
         self._cache = cache
 
     @classmethod
-    def create(cls, fingerprint_name, *args, **kwargs) -> 'Fingerprinter':
+    def create(cls, fingerprint_name, cache=None, *args, **kwargs) -> 'Fingerprinter':
         """ Factory method to allow easy creation of Fingerprinter objects """
         available_fps = cls.get_available_fingerprints()
         fp_class = available_fps.get(fingerprint_name)
@@ -25,14 +25,14 @@ class Fingerprinter(ABC, object):
             raise Exception(
                 f"Can't support fingerprint_name: '{fingerprint_name}'"
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
-        return fp_class(*args, **kwargs)
+        return fp_class(cache=cache, *args, **kwargs)
 
-    def fingerprint_and_encode(self, smiles: str, encoding: str):
-        if self._cache is not None:
-            if self._cache.encoding != encoding:
-                raise Exception("""Provided cache encoding and requested encoding
-                                do not match.""")
-            return self._cache.get(smiles)
+    def fingerprint_and_encode(self, smiles: str, encoding: str,
+                               use_cache=True):
+        if use_cache and self._cache is not None:
+            cached_encoding = self._cache.get(smiles, self.fp_type, encoding)
+            return cached_encoding if cached_encoding is not None else (
+                self.fingerprint_and_encode(smiles, encoding, use_cache=False))
         elif encoding == 'numpy':
             return self.smiles_to_nparray(smiles)
         elif encoding == 'bitarray':
@@ -72,6 +72,13 @@ class Fingerprinter(ABC, object):
 
     @abstractmethod
     def smiles_to_bitarray(self, smiles: str) -> bitarray:
+        pass
+
+    @property
+    @abstractmethod
+    def fp_type(self) -> str:
+        """ Returns a string describing the fingerprint type (e.g. 'daylight').
+        """
         pass
 
     @classmethod

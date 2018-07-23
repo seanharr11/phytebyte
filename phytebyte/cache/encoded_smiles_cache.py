@@ -1,19 +1,20 @@
 from abc import ABC, abstractmethod
 import pickle
 from typing import List
+import os
 
 from phytebyte import ROOT_DIR
 from phytebyte.fingerprinters import Fingerprinter
 
     
 class EncodedSmilesCache(ABC, object):
-    @abstractmethod
-    def __init__(self, fp_type: str, encoding: str):
-        """ Given a fingerprint type and a requested encoding, store these
-        specifications as attributes and 'load' the proper database (in memory, as
-        a Python object, etc.).
-        """
-        pass
+    # @abstractmethod
+    # def __init__(self, fp_type: str, encoding: str):
+    #     """ Given a fingerprint type and a requested encoding, store these
+    #     specifications as attributes and 'load' the proper database (in memory, as
+    #     a Python object, etc.).
+    #     """
+    #     pass
 
     @abstractmethod
     def get(smiles: List[str], fp_type: str, encoding: str):
@@ -46,20 +47,34 @@ class EncodedSmilesCache(ABC, object):
 
 
 class DictEncodedSmilesCache(EncodedSmilesCache):
-    def __init__(self, fp_type, encoding, root_dir=ROOT_DIR):
+    def __init__(self, root_dir=ROOT_DIR):
+        self.fp_type = None
+        self.encoding = None
+        self._root_dir = root_dir
+
+    def load(self, fp_type, encoding):
         self.fp_type = fp_type
         self.encoding = encoding
-        self._filepath = f'{root_dir}/.cache/{fp_type}_{encoding}.pkl'
+        filename = f'{self.fp_type}_{self.encoding}.pkl'
+        self._filepath = f'{self._root_dir}/.cache/{filename}'
+        if not filename in os.listdir(f'{self._root_dir}/.cache'):
+            raise Exception(""" Cache has not been created for this fingerprint
+                            and encoding combination. """)
         with open(self._filepath, 'rb') as f:
             self._cache = pickle.load(f)
 
-    def get(self, smiles):
-        return self._cache[smiles]
+    def get(self, smiles, fp_type, encoding):
+        if not all((self.fp_type == fp_type, self.encoding == encoding)):
+            self.load(fp_type, encoding)    
+        return self._cache[smiles] if smiles in self._cache.keys() else None
 
-    def update(self, smiles, fingerprinter):
-        encoded_smiles = fingerprinter.fingerprint_and_encode(smiles,
-                                                              self.encoding)
-        self._cache[smiles] = encoded_smiles
+    def update(self, smiles, fingerprinter, encoding):
+        if not all((self.fp_type == fingerprinter.fp_type, 
+                    self.encoding == encoding)):
+            self.load(fingerprinter.fp_type, encoding)    
+        if smiles:
+            enc = fingerprinter.fingerprint_and_encode(smiles, self.encoding)
+            self._cache[smiles] = enc
 
     def write(self):
         with open(self._filepath, 'wb') as f:
