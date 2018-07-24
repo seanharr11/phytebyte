@@ -16,9 +16,14 @@ class TanimotoThreshNegativeSampler(NegativeSampler):
         super().__init__(*args, **kwargs)
 
     def _encode_excluded_mol_ls(self,
-                                excluded_smiles: List[str]) -> List[bitarray]:
-        return [self._fingerprinter.fingerprint_and_encode(smiles, 'bitarray')
-                for smiles in excluded_smiles]
+                                excluded_smiles: List[str],
+                                pool) -> List[bitarray]:
+        return [encoded_cmpd for encoded_cmpd in pool.imap_unordered(
+            self._encode_as_bitarray,
+            excluded_smiles)]
+
+    def _encode_as_bitarray(self, smiles: str) -> bitarray:
+        return self._fingerprinter.fingerprint_and_encode(smiles, 'bitarray')
 
     def _filter_func(self, neg_smile: str) -> bool:
         neg_smile_bitarray = self._fingerprinter.smiles_to_bitarray(neg_smile)
