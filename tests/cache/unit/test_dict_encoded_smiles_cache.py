@@ -49,8 +49,9 @@ def test_get(desc):
 
 
 class myfp():
-    def __init__(self):
-        self.fp_name = 'daylight'
+    @property
+    def fp_type(self):
+        return 'daylight'
 
     def fingerprint_and_encode(self, smiles, encoding, from_cache=True):
         return np.zeros((1, 1024))
@@ -60,7 +61,7 @@ def test_update(desc):
     desc.update('CN=NEW', myfp(), 'numpy')
     assert 'CN=NEW' in desc._cache.keys()
     with pytest.raises(Exception):
-        desc.update('CN=NEW', nyfp(), 'not_an_encoding')
+        desc.update('CN=NEW', myfp(), 'not_an_encoding')
     
 
 def test_write(desc):

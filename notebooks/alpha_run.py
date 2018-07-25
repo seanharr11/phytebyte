@@ -20,7 +20,7 @@ pb.set_positive_clusterer('doesnt matter still',
                           Fingerprinter.create('daylight', cache))
 pb.set_fingerprinter("daylight", cache)
 f1_scores = pb.evaluate_models('Random Forest',
-                               neg_sample_size_factor=1,
+                               neg_sample_size_factor=10,
                                true_threshold=.8)
 food_cmpd_source = FoodbFoodCmpdSource(os.environ['FOODB_URL'])
 food_cmpds_sorted = pb.sort_predicted_bioactive_food_cmpds(food_cmpd_source)

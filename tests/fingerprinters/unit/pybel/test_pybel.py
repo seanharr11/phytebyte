@@ -16,6 +16,10 @@ class PybelFingerprinterSubclass(PybelFingerprinter):
     def _pybel_fp_length(self):
         return 1024
 
+    @property
+    def fp_type(self):
+        return 'daylight'
+
 
 @pytest.fixture
 def pybel_fp():
@@ -27,6 +31,10 @@ def pybel_fp():
         @property
         def _pybel_fp_length(self):
             return 1024
+
+        @property
+        def fp_type(self):
+            return 'daylight'
     return PybelFingerprinterSubclass()
 
 
@@ -40,6 +48,10 @@ def bad_pybel_fp():
         @property
         def _pybel_fp_length(self):
             return 1024
+
+        @property
+        def fp_type(self):
+            return 'daylight'
     return PybelFingerprinterSubclass()
 
 

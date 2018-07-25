@@ -35,7 +35,7 @@ class FoodbFoodCmpdQuery(Query):
 
 class FoodbFoodsFromCmpdQuery(Query):
     def __init__(self,
-                 food_cmpd_uid: List[int]):
+                 food_cmpd_uid: int):
         self._food_cmpd_uid = food_cmpd_uid
         assert self._food_cmpd_uid is None or isinstance(
             self._food_cmpd_uid, int)
