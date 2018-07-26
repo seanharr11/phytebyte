@@ -13,6 +13,7 @@ class Cluster():
 
     def get_encoded_cmpds(self, encoding: str,
                           fingerprinter: Fingerprinter) -> List:
+        # TODO: Multiprocess this step!
         return [fingerprinter.fingerprint_and_encode(cmpd.smiles, encoding)
                 for cmpd in self._bioactive_cmpds]
 
