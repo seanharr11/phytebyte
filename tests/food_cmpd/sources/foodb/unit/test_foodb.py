@@ -1,3 +1,4 @@
+import math
 from unittest.mock import Mock, MagicMock
 import pytest
 
@@ -59,9 +60,9 @@ def mock_fffc_query_class():
 
 @pytest.fixture
 def ffc_source(mock_create_engine_func,
-                mock_ffc_query_class,
-                mock_fffc_query_class,
-                monkeypatch):
+               mock_ffc_query_class,
+               mock_fffc_query_class,
+               monkeypatch):
     monkeypatch.setattr("phytebyte.food_cmpd.sources.base.create_engine",
                         mock_create_engine_func)
     monkeypatch.setattr("phytebyte.food_cmpd.sources.foodb.foodb."
@@ -70,18 +71,46 @@ def ffc_source(mock_create_engine_func,
     monkeypatch.setattr("phytebyte.food_cmpd.sources.foodb.foodb."
                         "FoodbFoodsFromCmpdQuery",
                         mock_fffc_query_class)
-    source = FoodbFoodCmpdSource("db_url://compound-interest") 
+    source = FoodbFoodCmpdSource("db_url://compound-interest")
     return source
 
 
-def test_fetch_all_cmpds(ffc_source):
+class MockRowProxy():
+    fetchmany_calls = 0
 
+    def __init__(self, num_fetchmany_calls, num_rows):
+        self.num_fetchmany_calls = num_fetchmany_calls
+        self.num_rows = num_rows
+
+    def fetchmany(self, _):
+        if self.fetchmany_calls == self.num_fetchmany_calls:
+            return None
+        self.fetchmany_calls += 1
+        rows_per_call = math.ceil(self.num_rows / self.num_fetchmany_calls)
+        return [[1] for _ in range(rows_per_call)]
+
+
+def test_fetch_all_cmpds(ffc_source, monkeypatch):
+    mock_result_proxy = MockRowProxy(num_fetchmany_calls=2,
+                                     num_rows=4)
+    mock_conn = Mock()
+    mock_conn.execute = MagicMock(return_value=mock_result_proxy)
+    mock_engine = Mock()
+    mock_engine.connect = MagicMock(return_value=mock_conn)
+    monkeypatch.setattr(
+        "phytebyte.food_cmpd.sources.base.create_engine",
+        MagicMock(return_value=mock_engine))
+    assert len([foo for foo in ffc_source.fetch_all_cmpds()]) == 4
+
+
+def test_fetch_foods(ffc_source, monkeypatch):
     mock_rows = [1] * 4
-    ffc_source.conn.execute = MagicMock(return_value=mock_rows)
-    assert len(ffc_source.fetch_all_cmpds()) == 4
+    mock_conn = Mock()
+    mock_conn.execute = MagicMock(return_value=mock_rows)
+    mock_engine = Mock()
+    mock_engine.connect = MagicMock(return_value=mock_conn)
+    monkeypatch.setattr(
+        "phytebyte.food_cmpd.sources.base.create_engine",
+        MagicMock(return_value=mock_engine))
 
-
-def test_fetch_foods(ffc_source):
-    mock_rows = [1] * 4
-    ffc_source.conn.execute = MagicMock(return_value=mock_rows)
     assert len(ffc_source.fetch_foods(100)) == 4
