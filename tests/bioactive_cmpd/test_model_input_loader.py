@@ -22,9 +22,23 @@ def mock_negative_sampler():
 
 
 @pytest.fixture
-def mock_positive_clusterer():
+def mock_encoded_cmpds():
+    return [Mock(), Mock()]
+
+
+@pytest.fixture
+def mock_clusters(mock_encoded_cmpds):
+    cluster1 = Mock()
+    cluster2 = Mock()
+    cluster1.get_encoded_cmpds = MagicMock(return_value=mock_encoded_cmpds)
+    cluster2.get_encoded_cmpds = MagicMock(return_value=mock_encoded_cmpds)
+    return [cluster1, cluster2]
+
+
+@pytest.fixture
+def mock_positive_clusterer(mock_clusters):
     m = Mock()
-    m.find_clusters = MagicMock(return_value=[Mock(), Mock()])
+    m.find_clusters = MagicMock(return_value=mock_clusters)
     return m
 
 
@@ -91,3 +105,24 @@ def test_load__calls_BinaryClassifierInputFactory_create(
         ['encoding', 'positives', 'negatives'])
     assert set(call_args_ls[1][1].keys()) == set(
         ['encoding', 'positives', 'negatives'])
+
+
+def test_load__calls_get_encoded_cmpds(mock_source,
+                                       mock_negative_sampler,
+                                       mock_positive_clusterer,
+                                       mock_target_input,
+                                       mock_clusters,
+                                       mock_encoding,
+                                       monkeypatch):
+    mil = ModelInputLoader(mock_source, mock_negative_sampler,
+                           mock_positive_clusterer, mock_target_input, 'numpy')
+    mil._get_neg_bioactive_cmpd_iters = MagicMock(
+        return_value=[iter(['C=O', 'C=N']), iter(['C', 'H2O'])])
+    mock_bcif = Mock()
+    mock_bcif.create = MagicMock(return_value=Mock())
+    monkeypatch.setattr("phytebyte.bioactive_cmpd.model_input_loader."
+                        "BinaryClassifierInputFactory", mock_bcif)
+    mil.load(2, output_fingerprinter)
+
+    mock_clusters[0].get_encoded_cmpds.assert_called_once()
+    mock_clusters[1].get_encoded_cmpds.assert_called_once()
