@@ -17,7 +17,8 @@ class Fingerprinter(ABC, object):
         self._cache = cache
 
     @classmethod
-    def create(cls, fingerprint_name, cache=None, *args, **kwargs) -> 'Fingerprinter':
+    def create(cls, fingerprint_name, cache=None, *args, **kwargs
+               ) -> 'Fingerprinter':
         """ Factory method to allow easy creation of Fingerprinter objects """
         available_fps = cls.get_available_fingerprints()
         fp_class = available_fps.get(fingerprint_name)
@@ -27,12 +28,10 @@ class Fingerprinter(ABC, object):
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
         return fp_class(cache=cache, *args, **kwargs)
 
-    def fingerprint_and_encode(self, smiles: str, encoding: str,
-                               use_cache=True):
-        if use_cache and self._cache is not None:
-            cached_encoding = self._cache.get(smiles, self.fp_type, encoding)
-            return cached_encoding if cached_encoding is not None else (
-                self.fingerprint_and_encode(smiles, encoding, use_cache=False))
+    def fingerprint_and_encode(self, smiles: str, encoding: str):
+        cached_encoding = self._cache.get(smiles, self.fp_type, encoding)
+        if cached_encoding is not None:
+            return cached_encoding
         elif encoding == 'numpy':
             return self.smiles_to_nparray(smiles)
         elif encoding == 'bitarray':
