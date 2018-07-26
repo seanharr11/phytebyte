@@ -11,14 +11,15 @@ class NotEnoughSamples(Exception):
 
 
 class NegativeSampler(ABC, object):
+    # TODO: Cache the negative_samples on a per-gene basis!
     def __init__(self,
                  source: BioactiveCompoundSource,
                  fingerprinter: Fingerprinter,
-                 num_proc: int=cpu_count(),
+                 num_proc: int=None,
                  *args, **kwargs):
         self._source = source
         self._fingerprinter = fingerprinter
-        self._num_proc = num_proc
+        self._num_proc = num_proc or cpu_count()
         self._excluded_mol_ls = None
 
         self._sample_encoding = None
@@ -48,9 +49,9 @@ class NegativeSampler(ABC, object):
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
             excluded_smiles=excluded_smiles_ls,
             limit=sz * 2)
-        self._excluded_mol_ls = self._encode_excluded_mol_ls(
-            excluded_smiles_ls)
         with Pool(self._num_proc) as p:
+            self._excluded_mol_ls = self._encode_excluded_mol_ls(
+                excluded_smiles_ls, p)
             cnt = 0
             for neg_x in p.imap_unordered(
                self._filter_and_encode, rand_neg_smiles_iter):

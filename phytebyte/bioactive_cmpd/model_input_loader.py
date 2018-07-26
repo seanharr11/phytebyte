@@ -37,7 +37,8 @@ class ModelInputLoader():
         bioactive_cmpd_list = [lazy_cmpd_callable() for lazy_cmpd_callable in
                                self._target_input.fetch_bioactive_cmpds(
                                    self._source)]
-        self.logger.info(f"Found '{len(bioactive_cmpd_list)}' pos samples.")
+        self.logger.info(
+            f"Found '{len(bioactive_cmpd_list)}' pos sample compounds.")
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
             bioactive_cmpd_list)
         self.logger.info(f"Found '{len(self._pos_cmpd_clusters)}' clusters.")
@@ -70,10 +71,12 @@ class ModelInputLoader():
                                         ) -> BinaryClassifierInput:
         neg_cmpds = list(neg_cmpd_iter)
         self.logger.info(f"Found '{len(neg_cmpds)}' neg samples")
+        pos_cmpds = cluster.get_encoded_cmpds(self._encoding,
+                                              output_fingerprinter)
+        self.logger.info(f"Found '{len(pos_cmpds)}' pos samples")
         return BinaryClassifierInputFactory.create(
             encoding=self._encoding,
-            positives=cluster.get_encoded_cmpds(self._encoding,
-                                                output_fingerprinter),
+            positives=pos_cmpds,
             negatives=neg_cmpds)
 
     @property

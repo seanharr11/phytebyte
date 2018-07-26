@@ -123,8 +123,28 @@ def phytebyte_fixture(monkeypatch,
     pb.set_positive_clusterer("Whocares", mock_fingerprinter)
     pb.set_negative_sampler("Not me!", mock_fingerprinter)
     pb.set_fingerprinter("Doin't care!")
+    # We don't actually want to multiprocess, b/c we can't pickle all these
+    # damn mock objects...
+
+    def imap_generator_func(f, food_cmpd_partial_iter):
+        return map(f, food_cmpd_partial_iter)
+    mock_pool = Mock()
+    mock_pool.imap_unordered = imap_generator_func
+    mock_pool_ctx_mgr = create_ctx_mgr_for(mock_pool)
+    monkeypatch.setattr('phytebyte.phytebyte.Pool',
+                        MagicMock(return_value=mock_pool_ctx_mgr))
 
     return pb
+
+
+def create_ctx_mgr_for(obj):
+    class CtxMgr():
+        def __enter__(self):
+            return obj
+
+        def __exit__(self):
+            return None
+    return CtxMgr()
 
 
 @pytest.fixture
@@ -202,7 +222,9 @@ def test_train_model__sets_model(phytebyte_fixture,
 
 def test_predict_bioactive_food_cmpd_iter__returns_iter(
         phytebyte_fixture_with_model,
-        mock_food_cmpd_source):
+        mock_food_cmpd_source,
+        monkeypatch):
+
     phytebyte_fixture_with_model.model.calc_score = MagicMock(
         return_value=mock_probability)
     food_cmpd_iter = phytebyte_fixture_with_model.\

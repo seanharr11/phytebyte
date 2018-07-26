@@ -8,6 +8,7 @@ from .food_cmpd import FoodCmpdSource, FoodCmpd
 from .fingerprinters import Fingerprinter
 
 import logging
+from multiprocessing import Pool, cpu_count
 from typing import List, Iterator, Tuple
 
 
@@ -100,12 +101,22 @@ class PhyteByte():
     def predict_bioactive_food_cmpd_iter(self,
                                          food_cmpd_source: FoodCmpdSource
                                          ) -> Iterator[Tuple[FoodCmpd, float]]:
-        food_cmpd_iter = food_cmpd_source.fetch_all_cmpds()
-        for food_cmpd in food_cmpd_iter:
-            encoded_cmpd = self._fingerprinter.fingerprint_and_encode(
-                food_cmpd.smiles, self.model.expected_encoding)
-            if encoded_cmpd is not None:
-                yield food_cmpd, self.model.calc_score(encoded_cmpd)
+        food_cmpd_partial_iter = food_cmpd_source.fetch_all_cmpds()
+        with Pool(cpu_count()) as p:
+            for food_cmpd, score in p.imap_unordered(self._get_food_cmpd_score,
+                                                     food_cmpd_partial_iter):
+                if food_cmpd is not None:
+                    yield food_cmpd, score
+
+    def _get_food_cmpd_score(self, food_cmpd_partial: FoodCmpd
+                             ) -> Tuple[FoodCmpd, float]:
+        food_cmpd = food_cmpd_partial()
+        encoded_cmpd = self._fingerprinter.fingerprint_and_encode(
+            food_cmpd.smiles, self.model.expected_encoding)
+        if encoded_cmpd is not None:
+            return food_cmpd, self.model.calc_score(encoded_cmpd)
+        else:
+            return None, None
 
     def sort_predicted_bioactive_food_cmpds(self, food_cmpd_source:
                                             FoodCmpdSource
