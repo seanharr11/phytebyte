@@ -11,6 +11,7 @@ class NotEnoughSamples(Exception):
 
 
 class NegativeSampler(ABC, object):
+    # TODO: Cache the negative_samples on a per-gene basis!
     def __init__(self,
                  source: BioactiveCompoundSource,
                  fingerprinter: Fingerprinter,

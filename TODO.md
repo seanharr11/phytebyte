@@ -1,3 +1,7 @@
+0. Cluster.get_encoded_cmpd(...) -> should be concurrent
+0. Finding positive_cmpds should be broken apart (into clusters?)
+by whether or not it is an inducer, or an inhibitor.
+0. All concurrent calls to fingerprint.fingerprint_and_encode(...) should be DRY'ed out
 1. Imeplement Phenotype2GeneTargetInput
  -- OMIM (NCBI) (Online Mendelian Inheritance in Man)
  -- GWAS Catalog (EBI) (50,000 rows)
