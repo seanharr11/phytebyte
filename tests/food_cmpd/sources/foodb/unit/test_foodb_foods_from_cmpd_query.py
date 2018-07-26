@@ -39,7 +39,7 @@ def test_whereclause(fffc_query):
 
 
 def test_order_by(fffc_query):
-    ob_str = str(fffc_query._order_by)
+    ob_str = [str(clause) for clause in fffc_query._order_by]
     assert "contents.orig_content DESC" in ob_str
     assert "contents.standard_content DESC" in ob_str
     assert "contents.orig_max DESC" in ob_str
