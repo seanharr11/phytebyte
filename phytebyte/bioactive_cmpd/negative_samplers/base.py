@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
-from multiprocessing import cpu_count, Pool
+from pathos.pools import ProcessPool as Pool
+from multiprocessing import cpu_count
 from typing import List, Iterator
 
 from phytebyte.bioactive_cmpd.sources.base import BioactiveCompoundSource
@@ -50,10 +51,12 @@ class NegativeSampler(ABC, object):
             excluded_smiles=excluded_smiles_ls,
             limit=sz * 2)
         with Pool(self._num_proc) as p:
+            print("Encoding positive moleclues...")
             self._excluded_mol_ls = self._encode_excluded_mol_ls(
                 excluded_smiles_ls, p)
+            print("Done.")
             cnt = 0
-            for neg_x in p.imap_unordered(
+            for neg_x in p.uimap(
                self._filter_and_encode, rand_neg_smiles_iter):
                 if neg_x is not None:
                     cnt += 1
