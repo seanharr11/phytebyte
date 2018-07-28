@@ -18,7 +18,7 @@ class TanimotoThreshNegativeSampler(NegativeSampler):
     def _encode_excluded_mol_ls(self,
                                 excluded_smiles: List[str],
                                 pool) -> List[bitarray]:
-        return [encoded_cmpd for encoded_cmpd in pool.imap_unordered(
+        return [encoded_cmpd for encoded_cmpd in pool.uimap(
             self._encode_as_bitarray,
             excluded_smiles)]
 
