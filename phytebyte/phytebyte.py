@@ -103,8 +103,8 @@ class PhyteByte():
                                          ) -> Iterator[Tuple[FoodCmpd, float]]:
         food_cmpd_partial_iter = food_cmpd_source.fetch_all_cmpds()
         with Pool(cpu_count()) as p:
-            for food_cmpd, score in p.imap_unordered(self._get_food_cmpd_score,
-                                                     food_cmpd_partial_iter):
+            for food_cmpd, score in p.uimap(self._get_food_cmpd_score,
+                                            food_cmpd_partial_iter):
                 if food_cmpd is not None:
                     yield food_cmpd, score
 

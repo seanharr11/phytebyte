@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from bitarray import bitarray
 import numpy as np
-from typing import List
+from typing import List, Iterator, Any
 
 
 class Fingerprinter(ABC, object):
@@ -28,14 +28,25 @@ class Fingerprinter(ABC, object):
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
         return fp_class(cache=cache, *args, **kwargs)
 
+    def fingerprint_and_encode_iter(self,
+                                    smiles_iter: Iterator[str],
+                                    encoding: str) -> Iterator[Any]:
+        self._cache.load()
+        for smiles in smiles_iter:
+            yield self.fingerprint_and_encode(smiles, encoding)
+        self._cache.unload()
+
     def fingerprint_and_encode(self, smiles: str, encoding: str):
-        cached_encoding = self._cache.get(smiles, self.fp_type, encoding)
+        cached_encoding = self._cache.get(
+            smiles, self.fp_type, encoding) if self._cache else None
         if cached_encoding is not None:
             return cached_encoding
         elif encoding == 'numpy':
-            return self.smiles_to_nparray(smiles)
+            foo = self.smiles_to_nparray(smiles)
+            return foo
         elif encoding == 'bitarray':
-            return self.smiles_to_bitarray(smiles)
+            foo = self.smiles_to_bitarray(smiles)
+            return foo
         else:
             raise NotImplementedError(encoding)
 
