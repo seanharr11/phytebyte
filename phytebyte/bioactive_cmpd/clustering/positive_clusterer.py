@@ -29,13 +29,15 @@ class PositiveClusterer(Clusterer):
 
     def silhouette_series(self, eps_seq, pos_cmpd_nparrays):
         labels_seq = [self.run_dbscan(e, pos_cmpd_nparrays) for e in eps_seq]
-        return np.array([self.get_silhouette(l, pos_cmpd_nparrays) for l in labels_seq])
+        return np.array([self.get_silhouette(l, pos_cmpd_nparrays)
+                         for l in labels_seq])
 
-    def find_clusters(self, 
+    def find_clusters(self,
                       pos_cmpds: List[BioactiveCompound],
                       eps_seq=np.array([0.1, 10, 15, 20, 100])):
         pos_cmpd_nparrays = self._fingerprinter.smiles_to_nparrays(
             [c.smiles for c in pos_cmpds])
+        # TODO ^Multiprocess, or re-use these from somewhere else
         ss_seq = self.silhouette_series(eps_seq, pos_cmpd_nparrays)
         if np.max(ss_seq) < 0.5:
             # No silhouette score sufficient to warrant grouping
