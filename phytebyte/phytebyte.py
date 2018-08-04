@@ -17,6 +17,10 @@ class PhyteByte():
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.INFO)
 
+    fingerprinter = None
+    model = None
+    # Globals to enable multiprocessing
+
     def __init__(self,
                  source: BioactiveCompoundSource,
                  target_input: TargetInput,
@@ -27,9 +31,6 @@ class PhyteByte():
         self._config_file_path = config_file_path
         self._negative_sampler = None
         self._positive_clusterer = None
-        self._fingerprinter = None
-
-        self.model = None
 
         if config_file_path:
             self._load_config()
@@ -59,9 +60,10 @@ class PhyteByte():
             *args,
             **kwargs)
 
-    def set_fingerprinter(self, fingerprinter_name: str, cache=None):
-        self._fingerprinter = Fingerprinter.create(fingerprinter_name,
-                                                   cache=cache)
+    @classmethod
+    def set_fingerprinter(cls, fingerprinter_name: str, cache=None):
+        cls.fingerprinter = Fingerprinter.create(fingerprinter_name,
+                                                 cache=cache)
 
     def train_model(self,
                     model_type: str,
@@ -73,9 +75,10 @@ class PhyteByte():
                                self._positive_clusterer, self._target_input,
                                binary_classifier_model.expected_encoding)
         binary_classifier_input = mdl.load(
-            neg_sample_size_factor, self._fingerprinter)
+            neg_sample_size_factor, self.fingerprinter)
+
         binary_classifier_model.train(binary_classifier_input, *args, **kwargs)
-        self.model = binary_classifier_model
+        PhyteByte.model = binary_classifier_model
 
     def evaluate_models(self,
                         model_type: str,
@@ -88,35 +91,47 @@ class PhyteByte():
                                self._positive_clusterer, self._target_input,
                                binary_classifier_model.expected_encoding)
         binary_classifier_inputs = mdl.load(
-            neg_sample_size_factor, self._fingerprinter)
+            neg_sample_size_factor, self.fingerprinter)
         f1_scores = [binary_classifier_model.evaluate(binary_classifier_input,
                                                       true_threshold,
                                                       *args,
                                                       **kwargs)
                      for binary_classifier_input in binary_classifier_inputs]
         self.logger.info(f"F1: {f1_scores}")
-        self.model = binary_classifier_model
+        PhyteByte.model = binary_classifier_model
         return f1_scores
 
     def predict_bioactive_food_cmpd_iter(self,
                                          food_cmpd_source: FoodCmpdSource
                                          ) -> Iterator[Tuple[FoodCmpd, float]]:
-        food_cmpd_partial_iter = food_cmpd_source.fetch_all_cmpds()
-        with Pool(cpu_count()) as p:
-            for food_cmpd, score in p.uimap(self._get_food_cmpd_score,
-                                            food_cmpd_partial_iter):
-                if food_cmpd is not None:
-                    yield food_cmpd, score
+        food_cmpd_iter = food_cmpd_source.fetch_all_cmpds()
+        cnt = 0
+        with Pool(cpu_count(),
+                  initializer=self._load_fingerprinter_cache) as p:
+            predicted_cmpd_bioactivity_iter = p.imap(
+                self._predict_cmpd_bioactivity,
+                food_cmpd_source.fetch_all_cmpd_smiles())
+            for food_cmpd, bioactivity_score in zip(
+                    food_cmpd_iter, predicted_cmpd_bioactivity_iter):
+                cnt += 1
+                if cnt % 1000 == 0:
+                    print(f"=============\n{cnt}\n============\n")
+                if food_cmpd is not None and bioactivity_score is not None:
+                    yield food_cmpd, bioactivity_score
 
-    def _get_food_cmpd_score(self, food_cmpd_partial: FoodCmpd
-                             ) -> Tuple[FoodCmpd, float]:
-        food_cmpd = food_cmpd_partial()
-        encoded_cmpd = self._fingerprinter.fingerprint_and_encode(
-            food_cmpd.smiles, self.model.expected_encoding)
+    @classmethod
+    def _load_fingerprinter_cache(cls):
+        print("Loading cache.")
+        cls.fingerprinter.load_cache()
+        print("Done.")
+
+    @classmethod
+    def _predict_cmpd_bioactivity(cls, food_cmpd_smiles: str
+                                  ) -> float:
+        encoded_cmpd = cls.fingerprinter.fingerprint_and_encode(
+            food_cmpd_smiles, cls.model.expected_encoding)
         if encoded_cmpd is not None:
-            return food_cmpd, self.model.calc_score(encoded_cmpd)
-        else:
-            return None, None
+            return cls.model.calc_score(encoded_cmpd)
 
     def sort_predicted_bioactive_food_cmpds(self, food_cmpd_source:
                                             FoodCmpdSource
