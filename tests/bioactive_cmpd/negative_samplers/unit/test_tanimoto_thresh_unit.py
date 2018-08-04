@@ -11,9 +11,9 @@ def test_init(ttn_sampler):
     assert ttn_sampler._fingerprinter
 
 
-def test_sample_wo_set_sample_encoding(ttn_sampler_wo_set_sample_encoding,
+def test_sample_wo_set_output_encoding(ttn_sampler_wo_set_output_encoding,
                                        output_fingerprinter):
-    sample_iter = ttn_sampler_wo_set_sample_encoding.sample(
+    sample_iter = ttn_sampler_wo_set_output_encoding.sample(
         ['C=N'], 100, output_fingerprinter)
     with pytest.raises(Exception):
         next(sample_iter)

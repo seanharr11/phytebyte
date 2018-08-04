@@ -15,7 +15,7 @@ def max_tani_thresh():
 
 
 @pytest.fixture
-def ttn_sampler_wo_set_sample_encoding(max_tani_thresh):
+def ttn_sampler_wo_set_output_encoding(max_tani_thresh):
     mock_fingerprinter = MockFingerprinter()
     mock_bioactive_cmpd_source = MockBioactiveCmpdSource()
     ttn_sampler = TanimotoThreshNegativeSampler(
@@ -26,6 +26,6 @@ def ttn_sampler_wo_set_sample_encoding(max_tani_thresh):
 
 
 @pytest.fixture
-def ttn_sampler(ttn_sampler_wo_set_sample_encoding):
-    ttn_sampler_wo_set_sample_encoding.set_sample_encoding('numpy')
-    return ttn_sampler_wo_set_sample_encoding
+def ttn_sampler(ttn_sampler_wo_set_output_encoding):
+    ttn_sampler_wo_set_output_encoding.set_output_encoding('numpy')
+    return ttn_sampler_wo_set_output_encoding

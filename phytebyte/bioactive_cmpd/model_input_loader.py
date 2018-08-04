@@ -42,7 +42,7 @@ class ModelInputLoader():
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
             bioactive_cmpd_list)
         self.logger.info(f"Found '{len(self._pos_cmpd_clusters)}' clusters.")
-        self._negative_sampler.set_sample_encoding(self._encoding)
+        self._negative_sampler.set_output_encoding(self._encoding)
         self._neg_cmpd_iters = self._get_neg_bioactive_cmpd_iters(
             neg_sample_size_factor,
             output_fingerprinter)
