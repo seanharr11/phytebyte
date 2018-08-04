@@ -42,9 +42,17 @@ class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
         # Return generator of curried functions, which when called, will
         # deserialize each row into namedtuple (allows caller to multi-process)
         with self.engine.connect() as conn:
-            return (functools.partial(query.row_to_bioactive_compound, row)
-                    for row in conn.execute(executable_query))
-            # TODO: Make sure conn is fetching rows in batches, or no benefit!
+            conn.execution_options(stream_results=True)
+            iterator = conn.execute(executable_query)
+            cnt = 0
+            while True:
+                chunk = iterator.fetchmany(1000)
+                cnt += 1
+                if not chunk:
+                    break
+                for row in chunk:
+                    yield functools.partial(query.row_to_bioactive_compound,
+                                            row)
 
     def fetch_random_compounds_exc_smiles(self,
                                           excluded_smiles: List[str],
@@ -64,4 +72,13 @@ class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
             limit=limit, excluded_smiles=excluded_smiles)
         executable_query = query.build()
         with self.engine.connect() as conn:
-            return (row[0] for row in conn.execute(executable_query))
+            conn.execution_options(stream_results=True)
+            iterator = conn.execute(executable_query)
+            cnt = 0
+            while True:
+                chunk = iterator.fetchmany(1000)
+                cnt += 1
+                if not chunk:
+                    break
+                for row in chunk:
+                    yield row[0]
