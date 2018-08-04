@@ -1,6 +1,4 @@
 from sqlalchemy import select, and_, desc
-from typing import List
-
 from phytebyte import Query
 from phytebyte.food_cmpd.types import FoodCmpd, FoodContent
 from .models import Compound, Content, Food
@@ -11,14 +9,11 @@ class FoodbFoodCmpdQuery(Query):
         pass
 
     def __repr__(self):
-        return "<FoodbFoodCmpdQuery>"
+        return self.__class__.__name__
 
     @staticmethod
     def row_to_food_cmpd(row, source) -> FoodCmpd:
-        return FoodCmpd(
-            # source=**, uid_=row[0], smiles=row[1],
-            # name=row[2], descr=row[3
-            source, *row)
+        return FoodCmpd(source, *row)
 
     @property
     def _select(self):
@@ -31,6 +26,17 @@ class FoodbFoodCmpdQuery(Query):
     @property
     def _select_from(self):
         return Compound.__table__
+
+    @property
+    def _order_by(self):
+        return (Compound.id,)
+
+
+class FoodbFoodCmpdSmilesOnlyQuery(FoodbFoodCmpdQuery):
+    @property
+    def _select(self):
+        return select([
+            Compound.moldb_smiles.label("smiles")])
 
 
 class FoodbFoodsFromCmpdQuery(Query):
