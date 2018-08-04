@@ -1,6 +1,5 @@
 from abc import abstractmethod, ABC
-from pathos.pools import ProcessPool as Pool
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Pool
 from typing import List, Iterator
 
 from phytebyte.bioactive_cmpd.sources.base import BioactiveCompoundSource
@@ -12,18 +11,19 @@ class NotEnoughSamples(Exception):
 
 
 class NegativeSampler(ABC, object):
-    # TODO: Cache the negative_samples on a per-gene basis!
+    output_fingerprinter = None
+    output_encoding = None
+
     def __init__(self,
                  source: BioactiveCompoundSource,
                  fingerprinter: Fingerprinter,
                  num_proc: int=None,
                  *args, **kwargs):
         self._source = source
-        self._fingerprinter = fingerprinter
         self._num_proc = num_proc or cpu_count()
         self._excluded_mol_ls = None
 
-        self._sample_encoding = None
+        self.fingerprinter = fingerprinter
 
     @classmethod
     def create(cls, negative_sampler_name: str,
@@ -37,26 +37,25 @@ class NegativeSampler(ABC, object):
         else:
             raise NotImplementedError
 
-    def set_sample_encoding(self, encoding: str):
-        self._sample_encoding = encoding
+    @classmethod
+    def set_output_encoding(cls, encoding: str):
+        cls._output_encoding = encoding
 
     def sample(self,
-               excluded_smiles_ls: List[str],
+               excluded_positive_smiles_ls: List[str],
                sz: int,
                output_fingerprinter: Fingerprinter) -> Iterator:
-        assert self._sample_encoding is not None,\
-            "Must 'set_sample_encoding()' before sampling"
-        self._output_fingerprinter = output_fingerprinter
+        assert self._output_encoding is not None,\
+            "Must 'set_output_encoding()' before sampling"
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
-            excluded_smiles=excluded_smiles_ls,
+            excluded_smiles=excluded_positive_smiles_ls,
             limit=sz * 2)
-        with Pool(self._num_proc) as p:
-            print("Encoding positive moleclues...")
-            self._excluded_mol_ls = self._encode_excluded_mol_ls(
-                excluded_smiles_ls, p)
-            print("Done.")
+        NegativeSampler.output_fingerprinter = output_fingerprinter
+        with Pool(processes=self._num_proc) as p:
+            self.encode_excluded_mols(excluded_positive_smiles_ls, p)
+        with Pool(processes=self._num_proc, initializer=self._init_pool) as p:
             cnt = 0
-            for neg_x in p.uimap(
+            for neg_x in p.imap(
                self._filter_and_encode, rand_neg_smiles_iter):
                 if neg_x is not None:
                     cnt += 1
@@ -71,20 +70,27 @@ class NegativeSampler(ABC, object):
                 raise NotEnoughSamples(
                     f"Queried {sz*2} samples, filterd to {cnt}, expected {sz}")
 
-    def _filter_and_encode(self, neg_smiles: str):
-        return self._output_fingerprinter.fingerprint_and_encode(
-                neg_smiles, self._sample_encoding)\
-            if self._filter_func(neg_smiles) else None
+    @classmethod
+    def _init_pool(cls):
+        cls.output_fingerprinter.load_cache()
 
+    @classmethod
+    def _filter_and_encode(cls, neg_smiles: str):
+        return cls.output_fingerprinter.fingerprint_and_encode(
+                neg_smiles, cls._output_encoding)\
+            if cls._filter_func(neg_smiles) else None
+
+    @classmethod
     @abstractmethod
-    def _filter_func(self, smiles: str) -> bool:
+    def _filter_func(cls, smiles: str) -> bool:
         """ Params: smiles :str - The SMiLES (str) representation of the cmpd
             Returns: Whether or not to include the SMiLES cmpd as neg sample
         """
         pass
 
+    @classmethod
     @abstractmethod
-    def _encode_excluded_mol_ls(self, excluded_smiles: List[str]) -> List:
+    def encode_excluded_mols(self, excluded_smiles: List[str]) -> List:
         """ Convert the `excluded_smiles` list into whatever encoding is
         required to be accessed within the concurrent `filter_and_encode`
         step, and it's call to _filter_func()`
