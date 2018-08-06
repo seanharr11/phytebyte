@@ -30,8 +30,10 @@ class TanimotoThreshNegativeSampler(NegativeSampler):
 
     @classmethod
     def _filter_func(cls, neg_smile: str) -> bool:
-        neg_smile_bitarray = cls._input_fingerprinter.smiles_to_bitarray(
-            neg_smile)
+        neg_smile_bitarray = cls._input_fingerprinter.fingerprint_and_encode(
+            neg_smile, 'bitarray')
+        if neg_smile_bitarray is None:
+            return False
         for excluded_mol_bitarray in cls._excluded_mols:
             tani = cls._calculate_tanimoto(excluded_mol_bitarray,
                                            neg_smile_bitarray)

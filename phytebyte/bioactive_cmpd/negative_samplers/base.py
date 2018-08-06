@@ -19,11 +19,11 @@ class NegativeSampler(ABC, object):
                  fingerprinter: Fingerprinter,
                  num_proc: int=None,
                  *args, **kwargs):
+        # TODO: Need fingerprinter here so we can avoid load_cache() when
+        # encoding excluded compounds!
         self._source = source
         self._num_proc = num_proc or cpu_count()
         self._excluded_mol_ls = None
-
-        self.fingerprinter = fingerprinter
 
     @classmethod
     def create(cls, negative_sampler_name: str,
@@ -39,13 +39,13 @@ class NegativeSampler(ABC, object):
 
     @classmethod
     def set_output_encoding(cls, encoding: str):
-        cls._output_encoding = encoding
+        cls.output_encoding = encoding
 
     def sample(self,
                excluded_positive_smiles_ls: List[str],
                sz: int,
                output_fingerprinter: Fingerprinter) -> Iterator:
-        assert self._output_encoding is not None,\
+        assert self.output_encoding is not None,\
             "Must 'set_output_encoding()' before sampling"
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
             excluded_smiles=excluded_positive_smiles_ls,
@@ -72,12 +72,12 @@ class NegativeSampler(ABC, object):
 
     @classmethod
     def _init_pool(cls):
-        cls.output_fingerprinter.load_cache()
+        pass
 
     @classmethod
     def _filter_and_encode(cls, neg_smiles: str):
         return cls.output_fingerprinter.fingerprint_and_encode(
-                neg_smiles, cls._output_encoding)\
+                neg_smiles, cls.output_encoding)\
             if cls._filter_func(neg_smiles) else None
 
     @classmethod
