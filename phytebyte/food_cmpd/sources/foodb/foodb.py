@@ -17,7 +17,6 @@ class FoodbFoodCmpdSource(FoodCmpdSource):
         while True:
             chunk = iterator.fetchmany(1000)
             cnt += 1
-            print(f"{query} Fetched chunks: '{cnt}'")
             if not chunk:
                 break
             for row in chunk:
@@ -33,7 +32,6 @@ class FoodbFoodCmpdSource(FoodCmpdSource):
         while True:
             chunk = iterator.fetchmany(1000)
             cnt += 1
-            print(f"{query} Fetched chunks: '{cnt}'")
             if not chunk:
                 break
             for row in chunk:
