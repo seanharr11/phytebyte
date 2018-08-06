@@ -1,3 +1,3 @@
-from .encoded_smiles_cache import DictEncodedSmilesCache, RedisEncodedSmilesCache
+from .bitstring_smiles_cache import BitstringSmilesCache
 
-__all__ = ['DictEncodedSmilesCache', 'RedisEncodedSmilesCache']
+__all__ = ['BitstringSmilesCache']
