@@ -49,7 +49,7 @@ class JsonBitstringSmilesCache(BitstringSmilesCache):
         self._cache = None
 
     def load(self):
-        filename = f'phytebyte.pkl'
+        filename = f'phytebyte.json'
         self._filepath = f'{self._root_dir}/.cache/{filename}'
         print(f"Loading cache from '{self._filepath}'")
         if os.path.exists(self._filepath):
