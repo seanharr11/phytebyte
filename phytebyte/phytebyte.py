@@ -13,9 +13,13 @@ from typing import List, Iterator, Tuple
 
 
 class PhyteByte():
-    logger = logging.getLogger(__name__)
-    logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.INFO)
+    logger = logging.getLogger("PhyteByte")
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '(%(asctime)s) - %(name)s [%(levelname)s]: %(message)s')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     fingerprinter = None
     model = None
@@ -75,7 +79,8 @@ class PhyteByte():
                                self._positive_clusterer, self._target_input,
                                binary_classifier_model.expected_encoding)
         binary_classifier_input = mdl.load(
-            neg_sample_size_factor, self.fingerprinter)
+            neg_sample_size_factor,
+            output_fingerprinter=self.fingerprinter)
 
         binary_classifier_model.train(binary_classifier_input, *args, **kwargs)
         PhyteByte.model = binary_classifier_model
@@ -87,16 +92,20 @@ class PhyteByte():
                         *args,
                         **kwargs) -> List[float]:
         binary_classifier_model = BinaryClassifierModel.create(model_type)
+        self.logger.info("Loading model input.")
         mdl = ModelInputLoader(self._source, self._negative_sampler,
                                self._positive_clusterer, self._target_input,
                                binary_classifier_model.expected_encoding)
         binary_classifier_inputs = mdl.load(
             neg_sample_size_factor, self.fingerprinter)
+        self.logger.debug("Done loading model input.")
+        self.logger.debug("Evaluating model.")
         f1_scores = [binary_classifier_model.evaluate(binary_classifier_input,
                                                       true_threshold,
                                                       *args,
                                                       **kwargs)
                      for binary_classifier_input in binary_classifier_inputs]
+        self.logger.debug("Done evaluating model.")
         self.logger.info(f"F1: {f1_scores}")
         PhyteByte.model = binary_classifier_model
         return f1_scores
@@ -105,25 +114,21 @@ class PhyteByte():
                                          food_cmpd_source: FoodCmpdSource
                                          ) -> Iterator[Tuple[FoodCmpd, float]]:
         food_cmpd_iter = food_cmpd_source.fetch_all_cmpds()
-        cnt = 0
-        with Pool(cpu_count(),
-                  initializer=self._load_fingerprinter_cache) as p:
+        with Pool(cpu_count()) as p:
             predicted_cmpd_bioactivity_iter = p.imap(
                 self._predict_cmpd_bioactivity,
                 food_cmpd_source.fetch_all_cmpd_smiles())
             for food_cmpd, bioactivity_score in zip(
                     food_cmpd_iter, predicted_cmpd_bioactivity_iter):
-                cnt += 1
-                if cnt % 1000 == 0:
-                    print(f"=============\n{cnt}\n============\n")
                 if food_cmpd is not None and bioactivity_score is not None:
                     yield food_cmpd, bioactivity_score
-
+    """
     @classmethod
     def _load_fingerprinter_cache(cls):
         print("Loading cache.")
         cls.fingerprinter.load_cache()
         print("Done.")
+    """
 
     @classmethod
     def _predict_cmpd_bioactivity(cls, food_cmpd_smiles: str
