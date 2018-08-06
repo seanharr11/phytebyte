@@ -13,38 +13,40 @@ class Fingerprinter(ABC, object):
     Factory method 'create()' instantiates each Fingerprinter implementation.
     """
 
-    def __init__(self, cache=None, *args, **kwargs):
-        self._cache = cache
-
     @classmethod
     def create(cls, fingerprint_name, cache=None, *args, **kwargs
                ) -> 'Fingerprinter':
         """ Factory method to allow easy creation of Fingerprinter objects """
         available_fps = cls.get_available_fingerprints()
         fp_class = available_fps.get(fingerprint_name)
+
         if fp_class is None:
             raise Exception(
                 f"Can't support fingerprint_name: '{fingerprint_name}'"
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
-        return fp_class(cache=cache, *args, **kwargs)
-
-    def load_cache(self):
-        if self._cache:
-            self._cache.load()
+        fp_class._bitstring_cache = cache
+        return fp_class()
 
     def fingerprint_and_encode(self, smiles: str, encoding: str):
-        cached_encoding = self._cache.get(
-            smiles, self.fp_type, encoding) if self._cache else None
-        if cached_encoding is not None:
-            return cached_encoding
-        elif encoding == 'numpy':
-            foo = self.smiles_to_nparray(smiles)
-            return foo
+        cached_bitstring = self._bitstring_cache.get(
+            smiles, self.fp_type) if self._bitstring_cache else None
+        if encoding == 'numpy':
+            if cached_bitstring is not None:
+                return self.bitstring_to_nparray(cached_bitstring)
+            else:
+                return self.smiles_to_nparray(smiles)
         elif encoding == 'bitarray':
-            foo = self.smiles_to_bitarray(smiles)
-            return foo
+            if cached_bitstring is not None:
+                return self.bitstring_to_bitarray(cached_bitstring)
+            else:
+                return self.smiles_to_bitarray(smiles)
         else:
             raise NotImplementedError(encoding)
+
+    def smiles_to_bitstring(self, smiles: str):
+        return self.nparray_to_bitstring(
+            self.smiles_to_nparray(
+                smiles))
 
     def smiles_to_nparrays(self, smiles_iter) -> np.ndarray:
         """ Converts `smiles_iter` into an np.array of np.arrays,
@@ -71,6 +73,14 @@ class Fingerprinter(ABC, object):
     def bitarray_to_nparray(self, bitarr) -> np.array:
         """ Converts bitarray encoding of 1 Fingerprint into an nparray  """
         return np.array(bitarr.tolist())
+
+    @abstractmethod
+    def bitstring_to_nparray(self, bitstring: str) -> np.array:
+        pass
+
+    @abstractmethod
+    def bitstring_to_bitarray(self, smiles: str) -> bitarray:
+        pass
 
     @abstractmethod
     def smiles_to_nparray(self, smiles: str) -> np.array:

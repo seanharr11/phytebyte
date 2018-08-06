@@ -2,12 +2,37 @@ from abc import ABC, abstractmethod
 from bitarray import bitarray
 import numpy as np
 import pybel
+import warnings
 
 from phytebyte.fingerprinters import Fingerprinter
 from .io import PybelDeserializer
 
+warnings.simplefilter("ignore", DeprecationWarning)
+# https://www.numpy.org/devdocs/release.html#id19
+
 
 class PybelFingerprinter(Fingerprinter, PybelDeserializer, ABC):
+    @staticmethod
+    def nparray_to_bitstring(nparray: np.ndarray):
+        if nparray is not None:
+            return "".join([str(bit) for bit in list(nparray)])
+
+    @staticmethod
+    def bitarray_to_bitstring(bitarr: bitarray):
+        if bitarr:
+            return str(bitarr)
+
+    @staticmethod
+    def bitstring_to_nparray(bitstring: str):
+        if bitstring:
+            # Add " sep='' " kwarg
+            return np.fromstring(bitstring, dtype='uint8')
+
+    @staticmethod
+    def bitstring_to_bitarray(bitstring: str):
+        if bitstring:
+            return bitarray(bitstring)
+
     def smiles_to_nparray(self, smiles: str):
         fp = self.smiles_to_fingerprint(smiles)
         if fp:
