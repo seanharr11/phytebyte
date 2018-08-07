@@ -13,46 +13,43 @@ class NotEnoughSamples(Exception):
 class NegativeSampler(ABC, object):
     output_fingerprinter = None
     output_encoding = None
+    excluded_mols = None
 
     def __init__(self,
                  source: BioactiveCompoundSource,
-                 fingerprinter: Fingerprinter,
-                 num_proc: int=None,
                  *args, **kwargs):
-        # TODO: Need fingerprinter here so we can avoid load_cache() when
-        # encoding excluded compounds!
         self._source = source
-        self._num_proc = num_proc or cpu_count()
+
+        self._num_proc = cpu_count()
         self._excluded_mol_ls = None
 
     @classmethod
-    def create(cls, negative_sampler_name: str,
+    def create(cls,
+               negative_sampler_name: str,
                source: BioactiveCompoundSource,
-               fingerprinter: Fingerprinter,
-               *args, **kwargs):
+               *args,
+               **kwargs):
         if negative_sampler_name == 'Tanimoto':
             from .tanimoto_thresh import TanimotoThreshNegativeSampler
             return TanimotoThreshNegativeSampler(
-                source, fingerprinter, *args, **kwargs)
+                source, *args, **kwargs)
         else:
             raise NotImplementedError
-
-    @classmethod
-    def set_output_encoding(cls, encoding: str):
-        cls.output_encoding = encoding
 
     def sample(self,
                excluded_positive_smiles_ls: List[str],
                sz: int,
-               output_fingerprinter: Fingerprinter) -> Iterator:
-        assert self.output_encoding is not None,\
-            "Must 'set_output_encoding()' before sampling"
+               output_fingerprinter: Fingerprinter,
+               output_encoding: str) -> Iterator:
         rand_neg_smiles_iter = self._source.fetch_random_compounds_exc_smiles(
             excluded_smiles=excluded_positive_smiles_ls,
             limit=sz * 2)
+        # Update Globals (class attrs) for multiprocessing
         NegativeSampler.output_fingerprinter = output_fingerprinter
+        NegativeSampler.output_encoding = output_encoding
         with Pool(processes=self._num_proc) as p:
-            self.encode_excluded_mols(excluded_positive_smiles_ls, p)
+            NegativeSampler.excluded_mols = self.encode_excluded_mols(
+                excluded_positive_smiles_ls, p)
         with Pool(processes=self._num_proc, initializer=self._init_pool) as p:
             cnt = 0
             for neg_x in p.imap(
@@ -69,6 +66,10 @@ class NegativeSampler(ABC, object):
                 p.join()
                 raise NotEnoughSamples(
                     f"Queried {sz*2} samples, filterd to {cnt}, expected {sz}")
+        # Reset state of Class Attribute (global)
+        NegativeSampler.output_fingerprinter = None
+        NegativeSampler.output_encoding = None
+        NegativeSampler.excluded_mols = None
 
     @classmethod
     def _init_pool(cls):
