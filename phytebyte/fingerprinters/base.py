@@ -29,7 +29,7 @@ class Fingerprinter(ABC, object):
 
     def fingerprint_and_encode(self, smiles: str, encoding: str):
         cached_bitstring = self._bitstring_cache.get(
-            smiles, self.fp_type) if self._bitstring_cache else None
+            smiles) if self._bitstring_cache else None
         if encoding == 'numpy':
             if cached_bitstring is not None:
                 return self.bitstring_to_nparray(cached_bitstring)

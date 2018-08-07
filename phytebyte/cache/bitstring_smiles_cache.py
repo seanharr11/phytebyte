@@ -44,12 +44,13 @@ class BitstringSmilesCache(ABC, object):
 
 
 class JsonBitstringSmilesCache(BitstringSmilesCache):
-    def __init__(self, root_dir=ROOT_DIR):
+    def __init__(self, fp_type, root_dir=ROOT_DIR):
         self._root_dir = root_dir
+        self._fp_type = fp_type
         self._cache = None
 
     def load(self):
-        filename = f'phytebyte.json'
+        filename = f'{self._fp_type}.json'
         self._filepath = f'{self._root_dir}/.cache/{filename}'
         print(f"Loading cache from '{self._filepath}'")
         if os.path.exists(self._filepath):
@@ -58,17 +59,17 @@ class JsonBitstringSmilesCache(BitstringSmilesCache):
         else:
             self._cache = {}
 
-    def get(self, smiles, fp_type):
-        return self._cache.get(f"{fp_type}_{smiles}")
+    def get(self, smiles):
+        return self._cache.get(smiles)
 
     def update(self, smiles, fingerprinter):
         bitstring = fingerprinter.smiles_to_bitstring(smiles)
-        self._cache[f"{fingerprinter.fp_type}_{smiles}"] = bitstring
+        self._cache[smiles] = bitstring
 
     def write(self):
         print(f"Dumping cache to '{self._filepath}'")
         with open(self._filepath, 'w+') as f:
-            f.write(json.dump(f, self._cache))
+            json.dump(self._cache, f)
 
     def clear(self):
         self._cache = {}
