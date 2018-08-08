@@ -14,7 +14,7 @@ def test_init(ffc_query):
 
 
 def test_repr_is_implemented(ffc_query):
-    assert "<FoodbFoodCmpdQuery" in repr(ffc_query)
+    assert "FoodbFoodCmpdQuery" == repr(ffc_query)
 
 
 def test_row_to_food_cmpd(ffc_query):
