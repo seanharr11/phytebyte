@@ -6,32 +6,8 @@ from phytebyte.bioactive_cmpd.sources import ChemblBioactiveCompoundSource
 
 
 @pytest.fixture
-def mock_row_iter():
-    return [
-        ["mock1", "mock2"],
-        ["mock3", "mock4"]]
-
-
-@pytest.fixture
-def mock_connection(mock_row_iter):
-    conn = Mock()
-    conn.execute = MagicMock(return_value=mock_row_iter)
-    conn.__enter__ = Mock(return_value=conn)
-    conn.__exit__ = Mock(return_value=None)
-    return conn
-
-
-@pytest.fixture
-def mock_engine(mock_connection):
-    e = Mock()
-    e.connect = MagicMock(return_value=mock_connection)
-    return e
-
-
-@pytest.fixture
-def mock_create_engine_func(mock_engine):
-    m = MagicMock(return_value=mock_engine)
-    return m
+def mock_rows():
+    return ["mock1", "mock2", "mock3", "mock4"]
 
 
 @pytest.fixture
@@ -57,10 +33,13 @@ def mock_crcs_query_class():
 
 
 @pytest.fixture
-def cbc_source(mock_create_engine_func,
+def cbc_source(mock_streaming_engine_factory,
+               mock_rows,
                mock_cbc_query_class,
                mock_crcs_query_class,
                monkeypatch):
+    mock_create_engine_func = MagicMock(
+        return_value=mock_streaming_engine_factory(mock_rows, 2))
     monkeypatch.setattr("phytebyte.bioactive_cmpd.sources.base.create_engine",
                         mock_create_engine_func)
     monkeypatch.setattr(
@@ -96,17 +75,14 @@ def test_fetch_with_compound_names(cbc_source, mock_bioactive_compound):
     assert first_partial() == mock_bioactive_compound
 
 
-def test_random_compounds_exc_smiles(monkeypatch, cbc_source):
+def test_random_compounds_exc_smiles(monkeypatch, cbc_source,
+                                     mock_streaming_engine_factory):
     mock_rows = [['CC=N'], ['CC=O']]
-    mock_conn = Mock()
-    mock_conn.execute = MagicMock(return_value=mock_rows)
-    mock_conn.__enter__ = Mock(return_value=mock_conn)
-    mock_conn.__exit__ = Mock(return_value=None)
-    mock_engine = Mock()
-    mock_engine.connect = MagicMock(return_value=mock_conn)
-    mock_engine.execution_options = MagicMock()
+    mock_engine = mock_streaming_engine_factory(mock_rows, 1)
+
     monkeypatch.setattr("phytebyte.bioactive_cmpd.sources.base.create_engine",
                         MagicMock(return_value=mock_engine))
+
     smiles_iter = cbc_source.fetch_random_compounds_exc_smiles(100, ['CC=P'])
     assert hasattr(smiles_iter, '__next__')
     first_smile = next(smiles_iter)
