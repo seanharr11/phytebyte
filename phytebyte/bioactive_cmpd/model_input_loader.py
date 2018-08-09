@@ -46,7 +46,6 @@ class ModelInputLoader():
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
             bioactive_cmpd_list)
         self.logger.info(f"Found '{len(self._pos_cmpd_clusters)}' clusters.")
-        self._negative_sampler.set_output_encoding(self._encoding)
         self._neg_cmpd_iters = self._get_neg_bioactive_cmpd_iters(
             neg_sample_size_factor,
             output_fingerprinter)
@@ -65,7 +64,8 @@ class ModelInputLoader():
         return [self._negative_sampler.sample(
                    [cmpd.smiles for cmpd in clust.bioactive_cmpds],
                    len(clust.bioactive_cmpds) * neg_sample_size_factor,
-                   output_fingerprinter)
+                   output_fingerprinter,
+                   self._encoding)
                 for clust in self._pos_cmpd_clusters]
 
     def _create_binary_classifier_input(self,

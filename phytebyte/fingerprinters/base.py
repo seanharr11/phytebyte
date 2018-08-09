@@ -24,29 +24,21 @@ class Fingerprinter(ABC, object):
             raise Exception(
                 f"Can't support fingerprint_name: '{fingerprint_name}'"
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
-        fp_class._bitstring_cache = cache
+        if hasattr(fp_class, '_set_cache'):
+            if cache:
+                fp_class.set_cache(cache)
+        else:
+            if cache is not None:
+                raise ValueError(f"Can't pass 'cache' to {fp_class}")
         return fp_class()
 
     def fingerprint_and_encode(self, smiles: str, encoding: str):
-        cached_bitstring = self._bitstring_cache.get(
-            smiles) if self._bitstring_cache else None
         if encoding == 'numpy':
-            if cached_bitstring is not None:
-                return self.bitstring_to_nparray(cached_bitstring)
-            else:
-                return self.smiles_to_nparray(smiles)
+            return self.smiles_to_nparray(smiles)
         elif encoding == 'bitarray':
-            if cached_bitstring is not None:
-                return self.bitstring_to_bitarray(cached_bitstring)
-            else:
-                return self.smiles_to_bitarray(smiles)
+            return self.smiles_to_bitarray(smiles)
         else:
             raise NotImplementedError(encoding)
-
-    def smiles_to_bitstring(self, smiles: str):
-        return self.nparray_to_bitstring(
-            self.smiles_to_nparray(
-                smiles))
 
     def smiles_to_nparrays(self, smiles_iter) -> np.ndarray:
         """ Converts `smiles_iter` into an np.array of np.arrays,
@@ -75,14 +67,6 @@ class Fingerprinter(ABC, object):
         return np.array(bitarr.tolist())
 
     @abstractmethod
-    def bitstring_to_nparray(self, bitstring: str) -> np.array:
-        pass
-
-    @abstractmethod
-    def bitstring_to_bitarray(self, smiles: str) -> bitarray:
-        pass
-
-    @abstractmethod
     def smiles_to_nparray(self, smiles: str) -> np.array:
         pass
 
@@ -100,8 +84,9 @@ class Fingerprinter(ABC, object):
     @classmethod
     def get_available_fingerprints(cls):
         from phytebyte.fingerprinters.pybel import (
-            DaylightFingerprinter, SpectrophoreFingerprinter)
+            DaylightFingerprinter,
+            SpectrophoreFingerprinter)
         return {
-                'daylight': DaylightFingerprinter,
-                'spectrophore': SpectrophoreFingerprinter
+                'spectrophore': SpectrophoreFingerprinter,
+                'daylight': DaylightFingerprinter
         }

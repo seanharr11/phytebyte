@@ -9,6 +9,9 @@ from phytebyte.fingerprinters.base import Fingerprinter
 @pytest.fixture
 def FingerprinterSubclass(mock_bit_string):
     class FingerprinterSubclass(Fingerprinter):
+        def __init__(self, bitstring_cache=None):
+            self._bitstring_cache = bitstring_cache
+
         def smiles_to_bitarray(self, smiles):
             return bitarray(mock_bit_string)
 

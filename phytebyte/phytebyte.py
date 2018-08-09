@@ -122,13 +122,6 @@ class PhyteByte():
                     food_cmpd_iter, predicted_cmpd_bioactivity_iter):
                 if food_cmpd is not None and bioactivity_score is not None:
                     yield food_cmpd, bioactivity_score
-    """
-    @classmethod
-    def _load_fingerprinter_cache(cls):
-        print("Loading cache.")
-        cls.fingerprinter.load_cache()
-        print("Done.")
-    """
 
     @classmethod
     def _predict_cmpd_bioactivity(cls, food_cmpd_smiles: str

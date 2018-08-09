@@ -8,9 +8,9 @@ by whether or not it is an inducer, or an inhibitor.
 2. Implement model_training graphing module (use functions in chemogenomics)
 3. Need a module to handle preprocessing food_cmpds (like in bioactive_cmpds)
 4. Implement phytebyte.py -> PhyteByte._load_config()
-5. Multi-processing on Deserializing FoodCmpds
 6. When passing Fingerprinters to set_positive_clustere() and set_negative_sampler(), replace arg with a kwarg with better naming (as opposed to the convoluted passing of Fingerprint.create('foo') obejcts to the set_*() methods"
 7. SVD Model to get Latent Feature Vector & apply Cosine Similarity
+8. All 'sources' (FoodCmpd & Bioactive) should share the same "streaming engine" logic. DRY this out, as we have already dried out the pytest fixture.
 # Kenny...
 5. Compound -> Cmpd
 6. Handle compounds that share a same SMiLES (we may care about the assay data on each!)
