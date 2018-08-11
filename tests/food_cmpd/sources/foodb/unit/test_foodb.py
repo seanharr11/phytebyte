@@ -7,8 +7,8 @@ from phytebyte.food_cmpd.sources import FoodbFoodCmpdSource
 @pytest.fixture
 def mock_rows():
     return [
-        ["mock1", "mock2"],
-        ["mock3", "mock4"]]
+        ["row_1_val_1", "row_1_val_2"],
+        ["row_2_val_1", "row_2_val_2"]]
 
 
 @pytest.fixture
@@ -38,12 +38,9 @@ def mock_fffc_query_class():
 
 
 @pytest.fixture
-def ffc_source(mock_create_engine_func,
-               mock_ffc_query_class,
+def ffc_source(mock_ffc_query_class,
                mock_fffc_query_class,
                monkeypatch):
-    monkeypatch.setattr("phytebyte.food_cmpd.sources.base.create_engine",
-                        mock_create_engine_func)
     monkeypatch.setattr("phytebyte.food_cmpd.sources.foodb.foodb."
                         "FoodbFoodCmpdQuery",
                         mock_ffc_query_class)
@@ -54,13 +51,13 @@ def ffc_source(mock_create_engine_func,
     return source
 
 
-def test_fetch_all_cmpds(ffc_source, monkeypatch,
+def test_fetch_all_cmpds(ffc_source, monkeypatch, mock_rows,
                          mock_streaming_engine_factory):
     mock_engine = mock_streaming_engine_factory(mock_rows, 2)
     monkeypatch.setattr(
         "phytebyte.food_cmpd.sources.base.create_engine",
         MagicMock(return_value=mock_engine))
-    assert len([foo for foo in ffc_source.fetch_all_cmpds()]) == 4
+    assert len([foo for foo in ffc_source.fetch_all_cmpds()]) == 2
 
 
 def test_fetch_foods(ffc_source, monkeypatch):

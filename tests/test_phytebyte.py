@@ -56,7 +56,7 @@ def mock_ModelInputLoader(mock_binary_classifier_input):
             pass
 
         def load(self, *args, **kwargs):
-            self.load_calls.append(args)
+            self.load_calls.append((args, kwargs))
             return mock_binary_classifier_input
 
     return ModelInputLoaderMock
@@ -75,9 +75,17 @@ def mock_food_cmpd_iterator():
 
 
 @pytest.fixture
-def mock_food_cmpd_source(mock_food_cmpd_iterator):
+def mock_food_cmpd_smiles_iterator():
+    return (Mock() for _ in range(10))
+
+
+@pytest.fixture
+def mock_food_cmpd_source(mock_food_cmpd_iterator,
+                          mock_food_cmpd_smiles_iterator):
     m = Mock()
     m.fetch_all_cmpds = MagicMock(return_value=mock_food_cmpd_iterator)
+    m.fetch_all_cmpd_smiles = MagicMock(
+        return_value=mock_food_cmpd_smiles_iterator)
     return m
 
 
@@ -120,16 +128,16 @@ def phytebyte_fixture(monkeypatch,
     # Builder pattern
     pb = PhyteByte(mock_source, mock_target_input)
     # Factory method proxies
-    pb.set_positive_clusterer("Whocares", mock_fingerprinter)
-    pb.set_negative_sampler("Not me!", mock_fingerprinter)
-    pb.set_fingerprinter("Doin't care!")
+    pb.set_positive_clusterer("Whocares", Mock())
+    pb.set_negative_sampler("Not me!", Mock())
+    pb.set_fingerprinter("Doin't care!", mock_fingerprinter)
     # We don't actually want to multiprocess, b/c we can't pickle all these
     # damn mock objects...
 
     def imap_generator_func(f, food_cmpd_partial_iter):
         return map(f, food_cmpd_partial_iter)
     mock_pool = Mock()
-    mock_pool.imap_unordered = imap_generator_func
+    mock_pool.imap = imap_generator_func
     mock_pool_ctx_mgr = create_ctx_mgr_for(mock_pool)
     monkeypatch.setattr('phytebyte.phytebyte.Pool',
                         MagicMock(return_value=mock_pool_ctx_mgr))
@@ -142,7 +150,7 @@ def create_ctx_mgr_for(obj):
         def __enter__(self):
             return obj
 
-        def __exit__(self):
+        def __exit__(self, *args, **kwargs):
             return None
     return CtxMgr()
 
@@ -194,7 +202,7 @@ def test_set_fingerprinter(monkeypatch,
                         mock_base_fingerprinter)
     pb = PhyteByte(mock_source, mock_target_input)
     pb.set_fingerprinter("no one cares!!!",)
-    assert pb._fingerprinter == mock_fingerprinter
+    assert pb.fingerprinter == mock_fingerprinter
 
 
 def test_train_model_calls__BinaryClassifierModel_train(
@@ -211,7 +219,8 @@ def test_train_model_calls__ModelInputLoader_load(mock_ModelInputLoader,
                                                   phytebyte_fixture):
     phytebyte_fixture.train_model('model_type', 1000)
     assert len(mock_ModelInputLoader.load_calls) == 1
-    assert mock_ModelInputLoader.load_calls == [(1000, mock_fingerprinter,)]
+    assert mock_ModelInputLoader.load_calls == [
+        ((1000,), {'output_fingerprinter': mock_fingerprinter})]
 
 
 def test_train_model__sets_model(phytebyte_fixture,

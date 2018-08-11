@@ -5,7 +5,7 @@ Within each top-level module you will find:
 
 Let's keep all unit and functional tests separate.
 
-*Unittests* should mock all external datasources, dependencies and libraries, &
+*Unit* tsts should mock all external datasources, dependencies and libraries, &
 only ever excecute the code visible in the method you are testing.
 These should poke only at public methods of classes, and not explicitly
 (implicit is fine) test any private methods.
