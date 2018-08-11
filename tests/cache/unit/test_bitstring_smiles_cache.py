@@ -38,27 +38,26 @@ def myfp(fp_type):
 
 
 @pytest.fixture
-def empty_cache(cache_root_dir, fp_type):
-    cache = JsonBitstringSmilesCache(fp_type, root_dir=cache_root_dir)
+def empty_cache(cache_root_dir):
+    cache = JsonBitstringSmilesCache(root_dir=cache_root_dir)
     return cache
 
 
 @pytest.fixture
 def loaded_cache(cache_root_dir, fp_type):
-    cache = JsonBitstringSmilesCache(fp_type, root_dir=cache_root_dir)
-    cache.load()
+    cache = JsonBitstringSmilesCache(root_dir=cache_root_dir)
+    cache.load(fp_type)
     return cache
 
 
-def test_init(cache_root_dir, fp_type):
-    cache = JsonBitstringSmilesCache(fp_type, root_dir=cache_root_dir)
+def test_init(cache_root_dir):
+    cache = JsonBitstringSmilesCache(root_dir=cache_root_dir)
     assert cache._root_dir == cache_root_dir
     assert cache._cache is None
-    assert cache._fp_type == fp_type
 
 
-def test_load(empty_cache):
-    empty_cache.load()
+def test_load(empty_cache, fp_type):
+    empty_cache.load(fp_type)
     assert list(empty_cache._cache.keys()) == ['CN=O']
 
 
@@ -73,11 +72,11 @@ def test_update(loaded_cache, myfp):
     assert 'CN=NEW' in loaded_cache._cache.keys()
 
 
-def test_write(loaded_cache, myfp):
+def test_write(loaded_cache, myfp, fp_type):
     loaded_cache.update('CN=NEW', myfp)
     loaded_cache.write()
     loaded_cache.clear()
-    loaded_cache.load()
+    loaded_cache.load(fp_type)
     assert 'CN=NEW' in loaded_cache._cache.keys()
 
 

@@ -13,8 +13,8 @@ FP_TYPE = "daylight"
 chembl_db_url = os.environ['CHEMBL_DB_URL']
 source = ChemblBioactiveCompoundSource(chembl_db_url)
 cache = BitstringSmilesCache.create("json", FP_TYPE)
-cache.load()
-# cache = None
+# cache.load(FP_TYPE)
+cache = None
 target_input = GeneTargetsInput(['GABRA1'])
 
 pb = PhyteByte(source, target_input)

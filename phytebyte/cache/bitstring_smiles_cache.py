@@ -44,13 +44,12 @@ class BitstringSmilesCache(ABC, object):
 
 
 class JsonBitstringSmilesCache(BitstringSmilesCache):
-    def __init__(self, fp_type, root_dir=ROOT_DIR):
+    def __init__(self, root_dir=ROOT_DIR):
         self._root_dir = root_dir
-        self._fp_type = fp_type
         self._cache = None
 
-    def load(self):
-        filename = f'{self._fp_type}.json'
+    def load(self, fp_type):
+        filename = f'{fp_type}.json'
         self._filepath = f'{self._root_dir}/.cache/{filename}'
         print(f"Loading cache from '{self._filepath}'")
         if os.path.exists(self._filepath):
