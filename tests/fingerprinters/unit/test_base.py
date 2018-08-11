@@ -1,7 +1,6 @@
 from bitarray import bitarray
 import numpy as np
 import pytest
-from unittest.mock import Mock, MagicMock
 
 from phytebyte.fingerprinters.base import Fingerprinter
 
@@ -9,9 +8,6 @@ from phytebyte.fingerprinters.base import Fingerprinter
 @pytest.fixture
 def FingerprinterSubclass(mock_bit_string):
     class FingerprinterSubclass(Fingerprinter):
-        def __init__(self, bitstring_cache=None):
-            self._bitstring_cache = bitstring_cache
-
         def smiles_to_bitarray(self, smiles):
             return bitarray(mock_bit_string)
 
@@ -25,9 +21,7 @@ def FingerprinterSubclass(mock_bit_string):
 
 
 def test_init(FingerprinterSubclass):
-    mock_cache = {'a': 1}
-    fs = FingerprinterSubclass(cache=mock_cache)
-    assert fs._cache['a'] == 1
+    assert FingerprinterSubclass()
 
 
 @pytest.fixture
@@ -93,23 +87,3 @@ def test_fingerprint_and_encode__bitarray(subclassed_fingerprinter,
     bitarr = subclassed_fingerprinter.fingerprint_and_encode(mock_smiles,
                                                              'bitarray')
     assert isinstance(bitarr, bitarray)
-
-
-class MockNumpyCache():
-    def __init__(self):
-        self.encoding = 'numpy'
-
-    def get(self, smiles, fp_type, encoding):
-        return 'cache result'
-
-
-@pytest.fixture
-def subclassed_fp_with_np_cache(FingerprinterSubclass):
-    return FingerprinterSubclass(cache=MockNumpyCache())
-
-
-def test_fingerprint_and_encode__np_cache(
-    subclassed_fp_with_np_cache):
-    print(subclassed_fp_with_np_cache._cache.encoding)
-    enc = subclassed_fp_with_np_cache.fingerprint_and_encode('CN=O', 'numpy')
-    assert enc == 'cache result'

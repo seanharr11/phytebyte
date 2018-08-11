@@ -1,26 +1,12 @@
-import bitarray
+from bitarray import bitarray
 import numpy as np
-from .pybel import PybelFingerprinter
-from phytebyte.fingerprinters.base import Fingerprinter
-
-
-class DaylightFingerprinter(PybelFingerprinter):
-    @property
-    def fp_type(self) -> str:
-        return "daylight"
-
-    @property
-    def _pybel_fp_name(self) -> str:
-        return "FP2"
-
-    @property
-    def _pybel_fp_length(self) -> int:
-        return 1024
+from .base import Fingerprinter
 
 
 class BitstringCacheFingerprinter(Fingerprinter):
     _bitstring_cache = None
 
+    @classmethod
     def set_cache(cls, bitstring_cache):
         cls._bitstring_cache = bitstring_cache
 
@@ -53,13 +39,12 @@ class BitstringCacheFingerprinter(Fingerprinter):
     @staticmethod
     def bitarray_to_bitstring(bitarr: bitarray):
         if bitarr:
-            return str(bitarr)
+            return bitarr.to01()
 
     @staticmethod
     def bitstring_to_nparray(bitstring: str):
         if bitstring:
-            # Add " sep='' " kwarg
-            return np.fromstring(bitstring, dtype='uint8')
+            return np.fromstring(bitstring, dtype='u1') - 48
 
     @staticmethod
     def bitstring_to_bitarray(bitstring: str):

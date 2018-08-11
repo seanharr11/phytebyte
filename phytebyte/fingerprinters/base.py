@@ -24,7 +24,7 @@ class Fingerprinter(ABC, object):
             raise Exception(
                 f"Can't support fingerprint_name: '{fingerprint_name}'"
                 f"\n --> Choices: {list(cls._available_fingerprints.keys())}")
-        if hasattr(fp_class, '_set_cache'):
+        if hasattr(fp_class, 'set_cache'):
             if cache:
                 fp_class.set_cache(cache)
         else:
