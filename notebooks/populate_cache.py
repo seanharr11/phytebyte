@@ -12,8 +12,10 @@ mybcs = ChemblBioactiveCompoundSource(os.environ['CHEMBL_DB_URL'])
 
 bitstring_cache = BitstringSmilesCache.create("json")
 
-bitstring_cache.load()
-target_gene_chembl_cmpds = mybcs.fetch_with_gene_tgts(['HMGCR'])
+bitstring_cache.load("daylight")
+target_gene_chembl_cmpds = mybcs.fetch_with_gene_tgts([
+    'HMGCR',
+    ])
 
 all_food_cmpds = myfcs.fetch_all_cmpds()
 
