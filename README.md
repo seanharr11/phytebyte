@@ -71,8 +71,11 @@ source ~/.bash_profile
 11. Run Tests
 ```
 # From phytebyte root dir
+source env/bin/activate  # Active python virtual env
 pytest -vv tests
 ```
 
 12. Run Phytebyte!
-
+```
+python run.py
+```
