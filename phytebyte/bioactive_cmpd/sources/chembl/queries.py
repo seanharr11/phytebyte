@@ -11,8 +11,12 @@ from .models import (
 )
 
 default_bioact_filter = BioactivityStandardFilter(
-    types=['IC50', 'EC50', 'AC50', 'GI50'],
-    relations=['=', '<'],
+    types=['EC50'], #, 'EC50'],
+    # GI50 used for cytostatic investigation, cell assays (as opposed to targets),
+    # IC50 is "inhibition concentration"
+    # EC50 is "effective concentration" that "complements a system"
+    # AC50 is "enzymatic activation"
+    relations=['=', '<', '<<', '>', '>>'],
     units=['nM'],
     max_value=20000)
 
@@ -51,11 +55,14 @@ class ChemblBioactiveCompoundQuery(Query):
             MoleculeDictionary.pref_name.label("pref_name"),
             CompoundStructure.canonical_smiles.label("canonical_smiles"),
             ComponentSynonym.component_synonym.label("gene_target"),
-            CompoundRecord.compound_name.label("name"),
             func.array_agg(Activity.standard_value).label("value_arr"),
             func.array_agg(Activity.standard_units).label("units_arr"),
             func.array_agg(Activity.standard_type).label("type_arr"),
-            func.array_agg(Assay.description).label("descr_arr")])
+            func.array_agg(Assay.description).label("descr_arr"),
+            """HERE BE HACKS: We take the "min" compound_name so we don't need to group by the name
+            ...if we grouped by 'name', we would get redundant compounds w/ same molregno, but diff names
+            """
+            func.min(CompoundRecord.compound_name).label("name")])
 
     @property
     def _select_from(self):
@@ -105,7 +112,7 @@ class ChemblBioactiveCompoundQuery(Query):
             CompoundStructure.molregno,
             MoleculeDictionary.molregno,
             ComponentSynonym.component_synonym,
-            CompoundRecord.compound_name)
+            CompoundRecord.molregno)
         return group_by_tuple
 
 

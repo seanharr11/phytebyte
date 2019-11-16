@@ -41,6 +41,7 @@ class ModelInputLoader():
         bioactive_cmpd_list = [lazy_cmpd_callable() for lazy_cmpd_callable in
                                self._target_input.fetch_bioactive_cmpds(
                                    self._source)]
+        self._check_for_redundant_molregno(bioactive_cmpd_list)
         self.logger.info(
             f"Found '{len(bioactive_cmpd_list)}' pos sample compounds.")
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
@@ -56,6 +57,13 @@ class ModelInputLoader():
             for clust, neg_cmpd_iter in zip(
                 self._pos_cmpd_clusters, self._neg_cmpd_iters)]
         return model_inputs
+        
+    @staticmethod
+    def _check_for_redundant_molregno(bioactive_cmpd_list):
+        all_molregno = [x.uid for x in bioactive_cmpd_list]
+        distinct_molregno = set(all_molregno)
+        if len(distinct_molregno) < len(all_molregno):
+            raise Exception(f"'{len(distinct_molregno)}' distinct compounds, '{len(all_molregno)}' total compounds.")
 
     def _get_neg_bioactive_cmpd_iters(self,
                                       neg_sample_size_factor: int,
