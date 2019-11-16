@@ -10,7 +10,7 @@ from .fingerprinters import Fingerprinter
 import logging
 from multiprocessing import Pool, cpu_count
 from typing import List, Iterator, Tuple
-
+import numpy as np
 
 class PhyteByte():
     logger = logging.getLogger("PhyteByte")
@@ -85,12 +85,14 @@ class PhyteByte():
         binary_classifier_model.train(binary_classifier_input, *args, **kwargs)
         PhyteByte.model = binary_classifier_model
 
-    def evaluate_models(self,
-                        model_type: str,
-                        neg_sample_size_factor: int,
-                        true_threshold: float,
-                        *args,
-                        **kwargs) -> List[float]:
+    def train_and_evaluate(
+            self,
+            model_type: str,
+            neg_sample_size_factor: int,
+            true_threshold: float,
+            *args,
+            **kwargs) -> List[float]:
+        self.logger.info("Training and evaluating model")
         binary_classifier_model = BinaryClassifierModel.create(model_type)
         self.logger.info("Loading model input.")
         mdl = ModelInputLoader(self._source, self._negative_sampler,
@@ -98,17 +100,41 @@ class PhyteByte():
                                binary_classifier_model.expected_encoding)
         binary_classifier_inputs = mdl.load(
             neg_sample_size_factor, self.fingerprinter)
-        self.logger.debug("Done loading model input.")
+        self.logger.debug("Done.")
         self.logger.debug("Evaluating model.")
         f1_scores = [binary_classifier_model.evaluate(binary_classifier_input,
                                                       true_threshold,
                                                       *args,
                                                       **kwargs)
                      for binary_classifier_input in binary_classifier_inputs]
-        self.logger.debug("Done evaluating model.")
+        # TODO: We don't really need multiple binary_classifier_inputs here
+        self.logger.debug("Done.")
         self.logger.info(f"F1: {f1_scores}")
-        PhyteByte.model = binary_classifier_model
+        PhyteByte.model = binary_classifier_model 
         return f1_scores
+    
+    def train(self,
+              model_type: str,
+              neg_sample_size_factor: int,
+              true_threshold: float,  
+              *args,
+              **kwargs) -> List[float]:
+        self.logger.info("Training model for production.")
+        binary_classifier_model = BinaryClassifierModel.create(model_type)
+        self.logger.info("Loading model input.")
+        mdl = ModelInputLoader(self._source, self._negative_sampler,
+                               self._positive_clusterer, self._target_input,
+                               binary_classifier_model.expected_encoding)
+        binary_classifier_inputs = mdl.load(
+            neg_sample_size_factor, self.fingerprinter)
+        self.logger.debug("Done.")
+        self.logger.debug("Training.")
+        binary_classifier_model.train(
+            binary_classifier_inputs[0],
+            np.arange(len(binary_classifier_inputs[0]))
+        )
+        PhyteByte.model = binary_classifier_model
+        self.logger.debug("Done.")
 
     def predict_bioactive_food_cmpd_iter(self,
                                          food_cmpd_source: FoodCmpdSource
@@ -122,6 +148,16 @@ class PhyteByte():
                     food_cmpd_iter, predicted_cmpd_bioactivity_iter):
                 if food_cmpd is not None and bioactivity_score is not None:
                     yield food_cmpd, bioactivity_score
+    
+    def load_positive_compounds(self, model_type: str):
+        binary_classifier_model = BinaryClassifierModel.create(model_type)
+        self.logger.info("Loading positive compounds")
+        mdl = ModelInputLoader(self._source, self._negative_sampler,
+                               self._positive_clusterer, self._target_input,
+                               binary_classifier_model.expected_encoding)
+        positive_compounds = mdl.load_positive_compounds()
+        return positive_compounds
+
 
     @classmethod
     def _predict_cmpd_bioactivity(cls, food_cmpd_smiles: str

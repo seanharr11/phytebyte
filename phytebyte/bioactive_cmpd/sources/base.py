@@ -16,11 +16,13 @@ class BioactiveCompoundSource(ABC, object):
         return engine
 
     @abstractmethod
-    def fetch_with_gene_tgts(self, gene_tgts: List[str]) -> \
+    def fetch_with_gene_tgts(self, bioactivity_type, gene_tgts: List[str]) -> \
             Iterator[Callable[[], BioactiveCompound]]:
         """
         Fetch `BioactiveCompounds`, with assayed bioactivity,
         that target specific genes.
+
+        `bioactivity_type`: 'agonist' | 'antagonist'
 
         `gene_tgts`: List of strings representing genes. Each
         `BioactiveCompound` returned should target one of the genes in the list

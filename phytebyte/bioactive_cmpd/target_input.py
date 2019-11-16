@@ -23,11 +23,12 @@ class PhenotypesTargetInput(TargetInput):
 
 
 class GeneTargetsInput(TargetInput):
-    def __init__(self, gene_targets: List[str]):
+    def __init__(self, gene_targets: List[str], bioactivity_type):
         self._gene_targets = gene_targets
+        self._bioactivity_type = bioactivity_type
 
     def fetch_bioactive_cmpds(self, source: BioactiveCompoundSource):
-        return source.fetch_with_gene_tgts(self._gene_targets)
+        return source.fetch_with_gene_tgts(self._bioactivity_type, self._gene_targets)
 
 
 class CompoundNamesTargetInput(TargetInput):

@@ -2,28 +2,20 @@ from sqlalchemy import select, and_, not_, func, join
 from typing import List
 
 from phytebyte import Query
+from phytebyte.bioactive_cmpd.sources.chembl.bioactivity import (
+    BioactivityStandardFilter)
 from phytebyte.bioactive_cmpd.types import (
-    BioactiveCompound, CompoundBioactivity, BioactivityStandardFilter)
+    BioactiveCompound, CompoundBioactivity)
 from .models import (
     CompoundStructure, MoleculeDictionary, ComponentSynonym,
     Activity, Assay, ComponentSequence, TargetComponent,
     CompoundRecord, TargetDictionary
 )
 
-default_bioact_filter = BioactivityStandardFilter(
-    types=['EC50'], #, 'EC50'],
-    # GI50 used for cytostatic investigation, cell assays (as opposed to targets),
-    # IC50 is "inhibition concentration"
-    # EC50 is "effective concentration" that "complements a system"
-    # AC50 is "enzymatic activation"
-    relations=['=', '<', '<<', '>', '>>'],
-    units=['nM'],
-    max_value=20000)
-
 
 class ChemblBioactiveCompoundQuery(Query):
     def __init__(self,
-                 bioact_standard_filter=default_bioact_filter,
+                 bioact_standard_filter: BioactivityStandardFilter,
                  gene_tgts: List[str]=None,
                  compound_names: List[str]=None):
         self._bioact_standard_filter = bioact_standard_filter
@@ -59,9 +51,8 @@ class ChemblBioactiveCompoundQuery(Query):
             func.array_agg(Activity.standard_units).label("units_arr"),
             func.array_agg(Activity.standard_type).label("type_arr"),
             func.array_agg(Assay.description).label("descr_arr"),
-            """HERE BE HACKS: We take the "min" compound_name so we don't need to group by the name
-            ...if we grouped by 'name', we would get redundant compounds w/ same molregno, but diff names
-            """
+            # HERE BE HACKS: We take the "min" compound_name so we don't need to group by the name
+            # if we grouped by 'name', we would get redundant compounds w/ same molregno, but diff names
             func.min(CompoundRecord.compound_name).label("name")])
 
     @property

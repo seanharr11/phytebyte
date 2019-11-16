@@ -9,13 +9,6 @@ BioactiveCompound = namedtuple("BioactiveCompound", [
     "name",
     "bioactivities"])
 
-# Used in ChemblBioactiveCompoundQuery to filter BioactivityAssays
-BioactivityStandardFilter = namedtuple("BioactivityStandardFilter", [
-    "types",
-    "relations",
-    "units",
-    "max_value"])
-
 BioactiveCompoundMechanism = namedtuple("BioactiveCompoundMechanism", [
     "mechanism_of_action", "action_type", "comment"])
 

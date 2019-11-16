@@ -5,11 +5,12 @@ from phytebyte.bioactive_cmpd.sources import BioactiveCompoundSource
 from phytebyte.bioactive_cmpd import BioactiveCompound
 from .queries import (
     ChemblBioactiveCompoundQuery, ChemblRandomCompoundSmilesQuery)
-
+from .bioactivity import agonist_bioact_filter, antagonist_bioact_filter
 
 class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
     def fetch_with_gene_tgts(self,
-                             gene_tgts: List[str]) ->\
+                             gene_tgts: List[str],
+                             bioactivity_type) ->\
                                  Iterator[Callable[[], BioactiveCompound]]:
         """
         Fetch `BioactiveCompounds`, with assayed bioactivity,
@@ -18,7 +19,12 @@ class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
         `gene_tgts`: List of strings representing genes. Each
         `BioactiveCompound` returned should target one of the genes in the list
         """
-        query = ChemblBioactiveCompoundQuery(gene_tgts=gene_tgts)
+        if bioactivity_type == "agonist":
+            query = ChemblBioactiveCompoundQuery(agonist_bioact_filter, gene_tgts=gene_tgts)
+        elif bioactivity_type == "antagonist":
+            query = ChemblBioactiveCompoundQuery(antagonist_bioact_filter, gene_tgts=gene_tgts)
+        else:
+            raise Exception(f"bioactivity_type '{bioactivity_type}' not supported")
         return self._fetch_bioactive_compounds(query)
 
     def fetch_with_compound_names(self, compound_names: List[str]) -> \

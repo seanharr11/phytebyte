@@ -33,15 +33,19 @@ class ModelInputLoader():
 
         self._pos_cmpd_clusters = None
         self._neg_cmpd_iters = None
+    
+    def load_positive_compounds(self):
+        bioactive_cmpd_list = [lazy_cmpd_callable() for lazy_cmpd_callable in
+                               self._target_input.fetch_bioactive_cmpds(
+                                   self._source)]
+        self._check_for_redundant_molregno(bioactive_cmpd_list)
+        return bioactive_cmpd_list
 
     def load(self, neg_sample_size_factor: int,
              output_fingerprinter: Fingerprinter
              ) -> List[BinaryClassifierInput]:
         assert isinstance(neg_sample_size_factor, int)
-        bioactive_cmpd_list = [lazy_cmpd_callable() for lazy_cmpd_callable in
-                               self._target_input.fetch_bioactive_cmpds(
-                                   self._source)]
-        self._check_for_redundant_molregno(bioactive_cmpd_list)
+        bioactive_cmpd_list = self.load_positive_compounds()
         self.logger.info(
             f"Found '{len(bioactive_cmpd_list)}' pos sample compounds.")
         self._pos_cmpd_clusters = self._positive_clusterer.find_clusters(
