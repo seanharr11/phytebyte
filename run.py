@@ -7,7 +7,7 @@ from phytebyte.fingerprinters import Fingerprinter
 from phytebyte.cache import BitstringSmilesCache
 
 import os
-
+from tabulate import tabulate
 
 FP_TYPE = "daylight"
 chembl_db_url = os.environ['CHEMBL_DB_URL']
@@ -18,29 +18,32 @@ cache = None
 
 target_input = GeneTargetsInput('agonist', ['PPARG'])
 
-
+fingerprinter = Fingerprinter.create('daylight', cache)
 pb = PhyteByte(source, target_input)
-pb.set_negative_sampler('Tanimoto', Fingerprinter.create('daylight', cache))
-pb.set_positive_clusterer('doesnt matter still',
-                          Fingerprinter.create('daylight', cache))
+pb.set_negative_sampler('Tanimoto', fingerprinter)
+pb.set_positive_clusterer('doesnt matter still', fingerprinter)
 pb.set_fingerprinter(FP_TYPE, cache)
-#f1_scores = pb.evaluate_models('Random Forest',
-#                               neg_sample_size_factor=100,
-#                               true_threshold=.5)
+f1_scores = pb.train_and_evaluate('Random Forest',
+                               neg_sample_size_factor=100,
+                               true_threshold=.5)
 
 # Now retrain and do the production run
-pb.train('Random Forest', neg_sample_size_factor=10, true_threshold=.5)
+pb.train('Random Forest', neg_sample_size_factor=100, true_threshold=.5)
 food_cmpd_source = FoodbFoodCmpdSource(os.environ['FOODB_URL'])
 food_cmpds_sorted = pb.sort_predicted_bioactive_food_cmpds(food_cmpd_source)
 print("Classifying Food Compounds...")
 
-pos_compound_smiles = [x.smiles for x in pb.load_positive_compounds('Random Forest')]
+pos_compound_bitarrays = [
+    fingerprinter.fingerprint_and_encode(x.smiles, 'bitarray')
+    for x in pb.load_positive_compounds('Random Forest')
+]
+rows = []
+headers=["Compound", "Score", "In Train Data", "Foods"]
 for i, (food_cmpd, score) in enumerate(food_cmpds_sorted[:100]):
-    food_info = food_cmpd.get_food_info_str(ignore_if_no_food=True,
-                                            ignore_if_no_food_content=False)
-    if food_info:
-        if food_cmpd.smiles not in pos_compound_smiles:
-            print(f"** {i}. ({score}) {food_info}")
-        else:
-            print(f"{i}. ({score}) {food_info}")
+    food_bullets = food_cmpd.get_food_bullets(False)
+    in_training_data = fingerprinter.fingerprint_and_encode(
+        food_cmpd.smiles, 'bitarray') in pos_compound_bitarrays
+    rows.append([food_cmpd.name, score, in_training_data, food_bullets])
+print(tabulate(rows, headers=headers, tablefmt="grid"))
+        
 

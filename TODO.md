@@ -14,5 +14,7 @@ by whether or not it is an inducer, or an inhibitor.
 # Kenny...
 5. Compound -> Cmpd
 6. Handle compounds that share a same SMiLES (we may care about the assay data on each!)
-7. !! Ensure uniqueness on positive_compounds
 8. Functionality to facilitate querying metadata on compounds, and just passing around SMiLES (especially for FoodCmpd)
+
+Improvements
+1. Not printing multiple assayed foods in the results (e.g. Sesame)

@@ -59,7 +59,7 @@ def cbc_source(mock_streaming_engine_factory,
 
 
 def test_fetch_with_gene_tgts(cbc_source, mock_bioactive_compound):
-    partial_iter = cbc_source.fetch_with_gene_tgts(['HMGCR'])
+    partial_iter = cbc_source.fetch_with_gene_tgts(['HMGCR'], 'agonist')
     assert hasattr(partial_iter, '__next__')
     first_partial = next(partial_iter)
     assert callable(first_partial)

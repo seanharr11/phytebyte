@@ -28,15 +28,19 @@ class FoodCmpd:
     @staticmethod
     def get_units(food: FoodContent):
         return f"{food.unit}"
+    
+    def get_food_bullets(self, ignore_if_no_food_content):
+        return "\n".join(
+            [f" - {food.food_name} ({food.food_part}) "
+             f"{self.get_amount(food)} {self.get_units(food)}"
+             for food in self.foods[0:5]
+             if not (ignore_if_no_food_content and not self.get_amount(food))]
+        )
 
     def get_food_info_str(self,
                           ignore_if_no_food=False,
                           ignore_if_no_food_content=False):
-        food_bullets = "\n".join(
-            [f" - {food.food_name} ({food.food_part}) "
-             f"{self.get_amount(food)} {self.get_units(food)}"
-             for food in self.foods
-             if not (ignore_if_no_food_content and not self.get_amount(food))])
+        food_bullets = self.get_food_bullets(ignore_if_no_food_content)
         return None if not food_bullets and ignore_if_no_food else\
             f"* Food Compound: {self.name}\n"\
             f"{food_bullets}\n"
