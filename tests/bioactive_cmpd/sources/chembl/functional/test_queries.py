@@ -1,7 +1,5 @@
-from phytebyte.bioactive_cmpd.sources.chembl import (
-    ChemblBioactiveCompoundQuery)
+from phytebyte.bioactive_cmpd.sources.chembl import (ChemblBioactiveCompoundQuery)
 from phytebyte.bioactive_cmpd.sources.chembl.bioactivity import antagonist_bioact_filter
-
 import os
 import pytest
 from sqlalchemy import create_engine
@@ -11,7 +9,6 @@ from sqlalchemy import create_engine
 def cbc_hmgcr_query():
     q = ChemblBioactiveCompoundQuery(antagonist_bioact_filter, gene_tgts=['HMGCR'])
     return q
-
 
 @pytest.fixture
 def chembl_engine():

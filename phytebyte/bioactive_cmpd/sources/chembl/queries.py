@@ -1,4 +1,4 @@
-from sqlalchemy import select, and_, not_, func, join
+from sqlalchemy import select, and_, not_, func, join, subquery
 from typing import List
 
 from phytebyte import Query
@@ -106,6 +106,10 @@ class ChemblBioactiveCompoundQuery(Query):
             CompoundRecord.molregno)
         return group_by_tuple
 
+    @property
+    def _order_by(self):
+        return (MoleculeDictionary.molregno,)
+
 
 class ChemblRandomCompoundSmilesQuery(Query):
     def __init__(self, limit: int, excluded_smiles: List[str]):
@@ -121,7 +125,9 @@ class ChemblRandomCompoundSmilesQuery(Query):
     @property
     def _select(self):
         return select([
-            CompoundStructure.canonical_smiles, func.random()]).distinct()
+            CompoundStructure.canonical_smiles, 
+            func.min(CompoundStructure.molregno).label("molregno"), 
+            func.random()])
 
     @property
     def _select_from(self):
@@ -139,3 +145,7 @@ class ChemblRandomCompoundSmilesQuery(Query):
     @property
     def _limit(self):
         return self._record_limit
+
+    @property
+    def _group_by(self):
+        return (CompoundStructure.molregno,)

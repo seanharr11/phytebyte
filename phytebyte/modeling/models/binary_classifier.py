@@ -64,6 +64,7 @@ class BinaryClassifierModel(ABC):
                 - `rand_state_seed` :int - For reproducibility of train/test
                 splitting
         """
+        np.random.seed(rand_state_seed)
         test_idx = np.random.choice(
             np.arange(len(bci)), size=round(test_size * len(bci)),
             replace=False)

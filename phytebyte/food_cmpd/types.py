@@ -29,12 +29,11 @@ class FoodCmpd:
     def get_units(food: FoodContent):
         return f"{food.unit}"
     
-    def get_food_bullets(self, ignore_if_no_food_content):
+    def get_food_bullets(self):
         return "\n".join(
             [f" - {food.food_name} ({food.food_part}) "
              f"{self.get_amount(food)} {self.get_units(food)}"
-             for food in self.foods[0:5]
-             if not (ignore_if_no_food_content and not self.get_amount(food))]
+             for food in self.foods[0:5]]
         )
 
     def get_food_info_str(self,

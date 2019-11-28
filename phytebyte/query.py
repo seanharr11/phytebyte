@@ -4,11 +4,18 @@ from sqlalchemy import select
 
 class Query(ABC):
     def __str__(self):
-        return str(self.build().compile(
-            compile_kwargs={"literal_binds": True}))
+        stmt = self.build()
+        return stmt.compile(
+            compile_kwargs={"literal_binds": True}).string
 
     def __repr__(self):
         return str(self)
+    
+    def to_raw_query(self, dialect):
+        stmt = self.build()
+        return stmt.compile(
+            dialect=dialect,
+            compile_kwargs={"literal_binds": True}).string
 
     def build(self) -> select:
         query = self._select\
