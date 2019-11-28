@@ -78,8 +78,9 @@ class ChemblBioactiveCompoundSource(BioactiveCompoundSource):
             limit=limit, excluded_smiles=excluded_smiles)
         raw_query = query.to_raw_query(self.engine.dialect)
         with self.engine.connect() as conn:
-            conn.execution_options(stream_results=True, isolation_level="READ_UNCOMMITTED")
-            iterator = conn.execute("SELECT setseed(.5); " + raw_query)
+            conn.execution_options(stream_results=True)
+            conn.execute(f"SELECT setseed({self.seed})")
+            iterator = conn.execute(raw_query)
             cnt = 0
             while True:
                 chunk = iterator.fetchmany(1000)

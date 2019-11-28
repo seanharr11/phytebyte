@@ -54,7 +54,7 @@ def cbc_source(mock_streaming_engine_factory,
         "phytebyte.bioactive_cmpd.sources.chembl.chembl."
         "ChemblBioactiveCompoundQuery",
         mock_cbc_query_class)
-    source = ChemblBioactiveCompoundSource("db_url://doesnt-matter")
+    source = ChemblBioactiveCompoundSource("db_url://doesnt-matter", .5)
     return source
 
 

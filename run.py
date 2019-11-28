@@ -10,8 +10,9 @@ import os
 from tabulate import tabulate
 
 FP_TYPE = "daylight"
+SEED = .6  # Used to alter the negative_samples
 chembl_db_url = os.environ['CHEMBL_DB_URL']
-source = ChemblBioactiveCompoundSource(chembl_db_url)
+source = ChemblBioactiveCompoundSource(chembl_db_url, SEED)
 # cache = BitstringSmilesCache.create("json", FP_TYPE)
 # cache.load(FP_TYPE)
 cache = None
@@ -38,12 +39,13 @@ pos_compound_bitarrays = [
     for x in pb.load_positive_compounds('Random Forest')
 ]
 rows = []
-headers=["Compound", "Score", "In Train Data", "Foods"]
+headers=["Compound", "Score", "Novel Relationship", "Foods"]
 for i, (food_cmpd, score) in enumerate(food_cmpds_sorted[:100]):
-    food_bullets = food_cmpd.get_food_bullets(False)
-    in_training_data = fingerprinter.fingerprint_and_encode(
-        food_cmpd.smiles, 'bitarray') in pos_compound_bitarrays
-    rows.append([food_cmpd.name, score, in_training_data, food_bullets])
+    food_bullets = food_cmpd.get_food_bullets()
+    if(len(food_bullets) > 0):
+        in_training_data = fingerprinter.fingerprint_and_encode(
+            food_cmpd.smiles, 'bitarray') in pos_compound_bitarrays
+        rows.append([food_cmpd.name, score, not in_training_data, food_bullets])
 print(tabulate(rows, headers=headers, tablefmt="grid"))
         
 

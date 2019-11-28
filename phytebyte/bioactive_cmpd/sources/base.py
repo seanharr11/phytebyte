@@ -6,8 +6,9 @@ from phytebyte.bioactive_cmpd.types import BioactiveCompound
 
 
 class BioactiveCompoundSource(ABC, object):
-    def __init__(self, db_url):
+    def __init__(self, db_url, seed):
         self.db_url = db_url
+        self.seed = seed
 
     @property
     def engine(self):
