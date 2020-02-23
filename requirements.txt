@@ -9,4 +9,7 @@ pandas==0.23.0
 scipy==1.1.0
 scikit-learn
 bitarray==0.8.1
+ujson
+tabulate
+openbabel
 -e .

@@ -9,17 +9,15 @@ from phytebyte.cache import BitstringSmilesCache
 import os
 from tabulate import tabulate
 
-FP_TYPE = "daylight"
+FP_TYPE = "daylight"  # "spectrophore"
 SEED = .6  # Used to alter the negative_samples
 chembl_db_url = os.environ['CHEMBL_DB_URL']
 source = ChemblBioactiveCompoundSource(chembl_db_url, SEED)
-# cache = BitstringSmilesCache.create("json", FP_TYPE)
-# cache.load(FP_TYPE)
 cache = None
 
 target_input = GeneTargetsInput('agonist', ['PPARG'])
 
-fingerprinter = Fingerprinter.create('daylight', cache)
+fingerprinter = Fingerprinter.create(FP_TYPE, cache)
 pb = PhyteByte(source, target_input)
 pb.set_negative_sampler('Tanimoto', fingerprinter)
 pb.set_positive_clusterer('doesnt matter still', fingerprinter)

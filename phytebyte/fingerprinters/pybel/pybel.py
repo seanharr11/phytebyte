@@ -35,6 +35,7 @@ class PybelFingerprinter(BitstringCacheFingerprinter, PybelDeserializer, ABC):
         try:
             mol = pybel.readstring("smi", smiles)
         except Exception as e:
+            self.logger.error(e)
             return None
         return mol
 
