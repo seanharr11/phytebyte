@@ -1,3 +1,7 @@
+# About
+
+Phytebyte is an extensible software framework used to train machine learning models to identify bioactive compounds found in *food*. The use case captured in 'run.py' is training models using known drug compounds that target a specific gene, and identifying plant compounds in FooDB that *may* behave similarly.
+
 # Install
 
 1. Download openbabel https://sourceforge.net/projects/openbabel/files/openbabel/2.4.1/openbabel-2.4.1.tar.gz/download
@@ -79,3 +83,31 @@ pytest -vv tests
 ```
 python run.py
 ```
+
+# Customization
+
+**BioactiveCompoundSource**
+The `BioactiveCompoundSource` abstract method defines an interface for fetching compounds by gene target, by name and via exclusion (by checking SMILES for equality). It represents a data source of compounds that will be queried to train a `BinaryClassifierModel`.
+
+**TargetInputs**
+The `TargetInput` is a simple data structure that tells the `BioactiveCompoundSource` what method to use when fetching input data for the `BinaryClassifierModel`. One can leverage the `GeneTargetsInput` (as done in run.py) to train a model on all compounds that either `agonize` or `antagonize` the given gene, in this use case, `PPARG`. Alternatively, the `CompoundNamesTargetInput` can be used to give a list of compound names found in ChEMBL to manually select the compounds used to train the model.
+
+**Fingerprinters**
+The `FP_TYPE` variable can be set to either `daylight` or `spectrophore` in `run.py`. Alternative fingerprints can be created by implementing the Fingerprinter abstract base class.
+
+**FoodCmpdSource**
+The `FoodCmpdSource` abstract base class can be further implemented to support additional food database sources. Our case study uses FooDB, but we encourage extending to other sources!
+
+**BinaryClassifierModel**
+The `BinaryClassifierModel` abstract base class can be further implemented to support alternative binary classifiers (SVM, LogisticRegression, etc.). Our use case leverages sklearn's `Random Forest`, and we also provide support for the `TanimotoBinaryClassifier` that uses tanimoto index to classify compounds.
+
+# Config
+
+**Fingerprinters**
+In `run.py`, `FP_TYPE` can be set to either `spectrophore` or `daylight`
+
+**Database URLs**
+In `run.py` we use environment variables storing `CHEMBL_DB_URL` and `FOODB_URL`. These get passed to each respective `Source` for querying compounds.
+
+**Negative Sample Size Factor**
+The `neg_sample_size_factor` indicates the multiple applied to the number of `positive` compound samples (i.e. `20` means "20 times the number of positive samples").
