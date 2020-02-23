@@ -11,5 +11,4 @@ scikit-learn
 bitarray==0.8.1
 ujson
 tabulate
-openbabel
 -e .
