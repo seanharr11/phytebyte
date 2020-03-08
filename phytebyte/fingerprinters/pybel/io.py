@@ -13,8 +13,7 @@ class PybelDeserializer():
     def smiles_to_molecule(self, smiles: str):
         try:
             mol = pybel.readstring("smi", smiles)
-        except OSError as e:
+        except Exception as e:
             self.logger.error(e)
-            self.logger.error(f"Couldn't load {smiles}")
-            raise SmilesDeserializationError()
+            return None
         return mol

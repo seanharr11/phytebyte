@@ -38,7 +38,10 @@ class PositiveClusterer(Clusterer):
         pos_cmpd_nparrays = self._fingerprinter.smiles_to_nparrays(
             [c.smiles for c in pos_cmpds])
         # TODO ^Multiprocess, or re-use these from somewhere else
-        ss_seq = self.silhouette_series(eps_seq, pos_cmpd_nparrays)
+        ss_seq = self.silhouette_series(
+            eps_seq, 
+            [np.nan_to_num(arr) for arr in pos_cmpd_nparrays]
+        )
         if np.max(ss_seq) < 0.5:
             # No silhouette score sufficient to warrant grouping
             return [Cluster(pos_cmpds)]
