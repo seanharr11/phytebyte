@@ -77,7 +77,7 @@ pg_restore -d chembl_30 chembl_30_postgresql.dmp
 ```
 # Open up ~/.bash_profile with text-editor, enter following at bottom
 export FOODB_URL="mysql://root:phytebyte@localhost/foo_db"
-export CHEMBL_DB_URL="postgres:///chembl_30"
+export CHEMBL_DB_URL="postgresql:///chembl_30"
 export PYTHONPATH=/usr/local/lib/python3.9/site-packages:$PYTHONPATH
 # Replace "python3.9" with the version with bindings linked in step 2/3
 ```
