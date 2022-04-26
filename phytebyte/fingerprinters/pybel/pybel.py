@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from bitarray import bitarray
 import numpy as np
-import pybel
+from openbabel import openbabel as ob
+from openbabel import pybel
 import warnings
 
 from phytebyte.fingerprinters.bitstring_cache_fingerprinter import (

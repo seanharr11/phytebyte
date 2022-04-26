@@ -1,4 +1,5 @@
-import pybel
+from openbabel import openbabel as ob
+from openbabel import pybel
 import numpy as np
 
 from phytebyte.fingerprinters.pybel import PybelDeserializer

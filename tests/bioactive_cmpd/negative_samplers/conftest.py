@@ -34,5 +34,6 @@ def ttn_sampler(output_fingerprinter, input_fingerprinter,
     ttn_sampler = TanimotoThreshNegativeSampler(
         mock_bioactive_cmpd_source,
         max_tanimoto_thresh=max_tani_thresh)
+    assert(ttn_sampler._input_fingerprinter) is not None
 
     return ttn_sampler

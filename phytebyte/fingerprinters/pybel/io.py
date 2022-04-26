@@ -1,5 +1,6 @@
 import logging
-import pybel
+from openbabel import openbabel as ob
+from openbabel import pybel
 
 
 class SmilesDeserializationError(Exception):
@@ -15,5 +16,5 @@ class PybelDeserializer():
             mol = pybel.readstring("smi", smiles)
         except Exception as e:
             self.logger.error(e)
-            return None
+            raise(SmilesDeserializationError)
         return mol

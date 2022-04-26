@@ -7,7 +7,9 @@ from phytebyte.fingerprinters import Fingerprinter
 
 
 class TanimotoThreshNegativeSampler(NegativeSampler):
-    _input_fingerprinter = None
+    _input_fingerprinter = "Foo"
+    # If this is never set in __init__ below, the `start_method` is likely "spawn" rather than "fork"
+    # https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods
     _max_tanimoto_thresh = None
 
     def __init__(self,

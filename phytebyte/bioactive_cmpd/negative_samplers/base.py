@@ -1,10 +1,12 @@
 from abc import abstractmethod, ABC
-from multiprocessing import cpu_count, Pool
+import logging
+from multiprocessing import cpu_count, Pool, set_start_method
 from typing import List, Iterator
 
 from phytebyte.bioactive_cmpd.sources.base import BioactiveCompoundSource
 from phytebyte.fingerprinters.base import Fingerprinter
 
+set_start_method("fork")
 
 class NotEnoughSamples(Exception):
     pass
@@ -14,6 +16,7 @@ class NegativeSampler(ABC, object):
     output_fingerprinter = None
     output_encoding = None
     excluded_mols = None
+    logger = logging.getLogger(__name__)
 
     def __init__(self,
                  source: BioactiveCompoundSource,
